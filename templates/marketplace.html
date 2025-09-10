@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KhetSetuMarket — Gamified Sustainable Farming Marketplace</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Subtle farm pattern */
+    .farm-pattern {
+      background-image: radial-gradient(#e6f6e6 1.2px, transparent 1.2px), radial-gradient(#e6f6e6 1.2px, transparent 1.2px);
+      background-position: 0 0, 12px 12px;
+      background-size: 24px 24px;
+    }
+
+    /* Toast animations */
+    @keyframes fade-in-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade-out-down { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+    .animate-fade-in-up { animation: fade-in-up .25s ease-out forwards; }
+    .animate-fade-out-down { animation: fade-out-down .25s ease-in forwards; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white/90 backdrop-blur sticky top-0 z-50 border-b">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-700 font-bold">KS</span>
+        <a href="#" class="text-2xl font-extrabold tracking-tight text-green-700">KhetSetu</a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-6">
+        <a href="#" class="text-gray-600 hover:text-green-700">Home</a>
+        <a href="#products" class="text-gray-600 hover:text-green-700">Buy</a>
+        <a href="#sell" class="text-gray-600 hover:text-green-700">Sell</a>
+        <a href="#about" class="text-gray-600 hover:text-green-700">About</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Gamified stats -->
+        <div class="hidden sm:flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-1">
+          <span class="text-xs text-green-700">Coins</span>
+          <span id="coins" class="text-sm font-semibold text-green-700">0</span>
+        </div>
+        <button id="cart-button" class="relative rounded-xl border px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
+          Cart
+          <span id="cart-count" class="absolute -top-2 -right-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-green-600 px-1.5 text-xs font-bold text-white">0</span>
+        </button>
+        <button class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">Login</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="farm-pattern">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-3xl p-8 md:p-12 text-center">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-green-800 leading-tight">Connecting Farmers, Cultivating Growth</h1>
+        <p class="mt-4 text-gray-600 text-lg">A gamified marketplace to buy & sell with rewards for sustainable choices.</p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="#products" class="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700">Explore Products</a>
+          <a href="#sell" class="bg-white text-green-700 border border-green-200 px-6 py-3 rounded-xl font-semibold hover:bg-green-50">List Your Product</a>
+        </div>
+
+        <!-- XP Progress -->
+        <div class="mt-8 text-left max-w-2xl mx-auto">
+          <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+            <span>Farmer Level <span id="level">1</span></span>
+            <span><span id="xp">0</span>/100 XP</span>
+          </div>
+          <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div id="xp-bar" class="h-full w-0 bg-green-600"></div>
+          </div>
+          <p class="mt-2 text-xs text-gray-500">Earn coins & XP by adding to cart, purchasing, or listing eco‑friendly items.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section id="categories" class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Browse by Category</h2>
+
+    <div id="category-chips" class="flex flex-wrap items-center justify-center gap-3 mb-8">
+      <!-- chips injected by JS -->
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="fertilisers">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🌿</div>
+        <h3 class="font-semibold text-gray-700">Fertilisers</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="seeds">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🌱</div>
+        <h3 class="font-semibold text-gray-700">Seeds</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="tools">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🛠️</div>
+        <h3 class="font-semibold text-gray-700">Tools</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="pesticides">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🪲</div>
+        <h3 class="font-semibold text-gray-700">Pesticides</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="machinery">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🚜</div>
+        <h3 class="font-semibold text-gray-700">Machinery</h3>
+      </div>
+      <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition text-center" data-cat="livestock">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-green-50 flex items-center justify-center">🐄</div>
+        <h3 class="font-semibold text-gray-700">Livestock</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls: Search + Sort -->
+  <section class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-sm border p-4 md:p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <input id="search" type="text" class="w-full md:w-80 rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="Search fertilisers, tools, seeds…" />
+        <button id="clear-search" class="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50">Clear</button>
+      </div>
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <label for="sort" class="text-sm text-gray-600">Sort</label>
+        <select id="sort" class="rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500">
+          <option value="featured">Featured</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating-desc">Rating</option>
+        </select>
+        <button id="only-eco" class="rounded-xl border px-3 py-2 text-sm hover:bg-green-50">Eco‑only</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section id="products" class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Featured Products</h2>
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- cards injected by JS -->
+    </div>
+  </section>
+
+  <!-- Sell Section -->
+  <section id="sell" class="container mx-auto px-4 sm:px-6 lg:px-8 pb-14">
+    <div class="bg-white rounded-3xl shadow-sm border p-8 md:p-12 text-center">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">Have Something to Sell?</h2>
+      <p class="text-gray-600 mb-8">List your products and reach buyers across India. Earn bonus coins for sustainable items.</p>
+      <button id="open-sell-modal-btn" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700">List Your Product Now</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="about" class="bg-gray-900 text-gray-300">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <p class="text-lg font-bold text-white">KhetSetuMarket</p>
+          <p class="text-sm mt-2 text-gray-400">A sustainable marketplace that rewards climate‑smart farming.</p>
+        </div>
+        <div>
+          <p class="font-semibold text-white">Links</p>
+          <ul class="mt-2 space-y-1">
+            <li><a class="hover:text-green-400" href="#products">Buy</a></li>
+            <li><a class="hover:text-green-400" href="#sell">Sell</a></li>
+            <li><a class="hover:text-green-400" href="#about">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold text-white">Contact</p>
+          <p class="text-sm mt-2 text-gray-400">support@khetsetumarket.example</p>
+        </div>
+      </div>
+      <div class="text-center text-gray-500 mt-8 border-t border-gray-800 pt-4">&copy; 2025 KhetSetuMarket. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Sell Product Modal (fixed & accessible) -->
+  <div id="sell-product-modal" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 opacity-0 pointer-events-none transition-opacity duration-300">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" aria-hidden="true"></div>
+    <!-- Dialog -->
+    <div role="dialog" aria-modal="true" aria-labelledby="sellModalTitle" class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl translate-y-6 opacity-0 transition-all duration-300">
+      <div class="flex justify-between items-center p-5 border-b">
+        <h3 id="sellModalTitle" class="text-xl font-semibold text-gray-800">List a New Product</h3>
+        <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl" aria-label="Close">&times;</button>
+      </div>
+      <form id="sell-form" class="p-6 space-y-4">
+        <div>
+          <label for="productName" class="block mb-1 text-sm font-medium text-gray-900">Product Name</label>
+          <input type="text" id="productName" class="w-full rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="e.g., Organic Fertilizer" required />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="category" class="block mb-1 text-sm font-medium text-gray-900">Category</label>
+            <select id="category" class="w-full rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500" required>
+              <option value="" disabled selected>Choose a category</option>
+              <option value="fertilisers">Fertilisers</option>
+              <option value="tools">Tools</option>
+              <option value="seeds">Seeds</option>
+              <option value="pesticides">Pesticides</option>
+              <option value="machinery">Machinery</option>
+              <option value="livestock">Livestock</option>
+            </select>
+          </div>
+          <div>
+            <label for="price" class="block mb-1 text-sm font-medium text-gray-900">Price (₹)</label>
+            <input type="number" id="price" min="0" step="0.01" class="w-full rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="e.g., 399.00" required />
+          </div>
+        </div>
+        <div>
+          <label for="eco" class="inline-flex items-center gap-2 text-sm font-medium text-gray-900">
+            <input id="eco" type="checkbox" class="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+            Mark as eco‑friendly (organic / water‑saving / low‑carbon)
+          </label>
+        </div>
+        <div>
+          <label for="description" class="block mb-1 text-sm font-medium text-gray-900">Product Description</label>
+          <textarea id="description" rows="4" class="w-full rounded-xl border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="Write a brief description..."></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+          <button type="button" id="cancel-modal-btn" class="rounded-xl border px-4 py-2 hover:bg-gray-50">Cancel</button>
+          <button type="submit" class="rounded-xl bg-green-600 text-white px-5 py-2.5 hover:bg-green-700">Submit Listing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[60] space-y-2"></div>
+
+  <script>
+    // -----------------------------
+    // Mock data & helpers
+    // -----------------------------
+    const PRODUCTS = [
+      { id: 1, name: 'Organic Urea Fertilizer', brand: "Farmer's Choice", price: 1299, img: 'https://placehold.co/400x300/a2d9a1/333333?text=Fertilizer', rating: 4.6, category: 'fertilisers', eco: true, badges: ['Organic', 'Low-carbon'] },
+      { id: 2, name: 'Gardening Tool Set', brand: 'AgriTools Co.', price: 3699, img: 'https://placehold.co/400x300/f5d0a9/333333?text=Tools', rating: 4.3, category: 'tools', eco: false, badges: ['Durable'] },
+      { id: 3, name: 'Heirloom Tomato Seeds', brand: 'Seedling Stars', price: 249, img: 'https://placehold.co/400x300/81c784/333333?text=Seeds', rating: 4.8, category: 'seeds', eco: true, badges: ['Heirloom', 'Water‑saving'] },
+      { id: 4, name: 'Large Compost Bin', brand: 'EcoGrow', price: 6999, img: 'https://placehold.co/400x300/bcaaa4/333333?text=Compost+Bin', rating: 4.4, category: 'tools', eco: true, badges: ['Recycled'] },
+      { id: 5, name: 'Drip Irrigation Kit', brand: 'JalSmart', price: 2599, img: 'https://placehold.co/400x300/88d3ce/333333?text=Irrigation', rating: 4.7, category: 'tools', eco: true, badges: ['Water‑saving'] },
+      { id: 6, name: 'Bio Pesticide (Neem)', brand: 'GreenShield', price: 499, img: 'https://placehold.co/400x300/cdeac0/333333?text=Bio+Pesticide', rating: 4.5, category: 'pesticides', eco: true, badges: ['Organic'] },
+      { id: 7, name: 'Mini Power Tiller', brand: 'KisanPro', price: 45999, img: 'https://placehold.co/400x300/d1c4e9/333333?text=Tiller', rating: 4.1, category: 'machinery', eco: false, badges: ['Efficient'] },
+      { id: 8, name: 'Dairy Feed Bundle', brand: 'Gaushala', price: 1199, img: 'https://placehold.co/400x300/ffe0b2/333333?text=Livestock', rating: 4.2, category: 'livestock', eco: false, badges: ['Balanced'] },
+    ];
+
+    const CATEGORIES = ['all','fertilisers','seeds','tools','pesticides','machinery','livestock'];
+
+    // Coins / XP state
+    let coins = 0, xp = 0, level = 1, cart = [];
+
+    const fmtINR = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+
+    // -----------------------------
+    // UI helpers
+    // -----------------------------
+    const toastContainer = document.getElementById('toast-container');
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'bg-gray-900/90 text-white px-4 py-2 rounded-xl shadow-lg animate-fade-in-up';
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('animate-fade-out-down');
+        toast.addEventListener('animationend', () => toast.remove());
+      }, 2600);
+    }
+
+    function reward(action = 'Action', ecoBonus = false) {
+      const base = 5; // base coins
+      const addCoins = ecoBonus ? base + 5 : base;
+      const addXP = ecoBonus ? 15 : 10;
+      coins += addCoins; xp += addXP;
+      // Level up each 100 XP
+      while (xp >= 100) { level++; xp -= 100; showToast(`🎉 Level up! You are now Level ${level}`); }
+      document.getElementById('coins').textContent = coins;
+      document.getElementById('xp').textContent = xp;
+      document.getElementById('level').textContent = level;
+      document.getElementById('xp-bar').style.width = `${xp}%`;
+      showToast(`${action} ✓ +${addCoins} coins, +${addXP} XP`);
+    }
+
+    // -----------------------------
+    // Products rendering & filters
+    // -----------------------------
+    const grid = document.getElementById('product-grid');
+    let activeCategory = 'all';
+    let ecoOnly = false;
+
+    function renderProducts() {
+      grid.innerHTML = '';
+      let q = document.getElementById('search').value.trim().toLowerCase();
+      let sort = document.getElementById('sort').value;
+
+      let list = PRODUCTS.filter(p => (activeCategory === 'all' || p.category === activeCategory));
+      if (ecoOnly) list = list.filter(p => p.eco);
+      if (q) list = list.filter(p => (p.name + ' ' + p.brand).toLowerCase().includes(q));
+
+      switch (sort) {
+        case 'price-asc': list.sort((a,b) => a.price - b.price); break;
+        case 'price-desc': list.sort((a,b) => b.price - a.price); break;
+        case 'rating-desc': list.sort((a,b) => b.rating - a.rating); break;
+        default: break; // featured
+      }
+
+      if (!list.length) {
+        grid.innerHTML = `<div class="col-span-full text-center text-gray-500">No products match your filters.</div>`;
+        return;
+      }
+
+      list.forEach(p => grid.appendChild(productCard(p)));
+    }
+
+    function productCard(p) {
+      const el = document.createElement('div');
+      el.className = 'bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden group border';
+      el.innerHTML = `
+        <img src="${p.img}" alt="${p.name}" class="w-full h-48 object-cover group-hover:opacity-90 transition" onerror="this.src='https://placehold.co/400x300?text=KhetSetu'"/>
+        <div class="p-4 space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">${p.name}</h3>
+              <p class="text-xs text-gray-500">by ${p.brand}</p>
+            </div>
+            ${p.eco ? '<span class="inline-flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Eco</span>' : ''}
+          </div>
+          <div class="flex flex-wrap gap-1">
+            ${p.badges.map(b => `<span class='text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border'>${b}</span>`).join('')}
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-bold text-green-700">${fmtINR(p.price)}</span>
+            <div class="flex items-center gap-1 text-amber-500" aria-label="rating">
+              <span>★</span><span class="text-sm text-gray-700">${p.rating.toFixed(1)}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button data-id="${p.id}" class="add-to-cart bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 text-sm">Add to Cart</button>
+            <button class="rounded-xl border px-3 py-2 text-sm">Details</button>
+          </div>
+        </div>`;
+
+      // Add to cart handler
+      el.querySelector('.add-to-cart').addEventListener('click', () => {
+        cart.push(p.id);
+        document.getElementById('cart-count').textContent = cart.length;
+        reward('Added to cart', p.eco);
+      });
+
+      return el;
+    }
+
+    // Category chips
+    const chipsWrap = document.getElementById('category-chips');
+    CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'chip rounded-full border px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-50';
+      btn.dataset.cat = cat;
+      btn.textContent = cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1);
+      chipsWrap.appendChild(btn);
+    });
+
+    function updateActiveChip() {
+      chipsWrap.querySelectorAll('button').forEach(b => {
+        if (b.dataset.cat === activeCategory) {
+          b.classList.add('bg-green-600','text-white','border-green-600');
+        } else {
+          b.classList.remove('bg-green-600','text-white','border-green-600');
+        }
+      });
+    }
+
+    chipsWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      activeCategory = btn.dataset.cat;
+      updateActiveChip();
+      renderProducts();
+    });
+
+    // Search / Sort / Eco toggle
+    document.getElementById('search').addEventListener('input', renderProducts);
+    document.getElementById('clear-search').addEventListener('click', () => { document.getElementById('search').value=''; renderProducts(); });
+    document.getElementById('sort').addEventListener('change', renderProducts);
+    document.getElementById('only-eco').addEventListener('click', (e) => {
+      ecoOnly = !ecoOnly;
+      e.currentTarget.classList.toggle('bg-green-600');
+      e.currentTarget.classList.toggle('text-white');
+      e.currentTarget.classList.toggle('border-green-600');
+      renderProducts();
+    });
+
+    // Click category tiles to filter
+    document.querySelectorAll('[data-cat]').forEach(tile => {
+      tile.addEventListener('click', () => {
+        activeCategory = tile.dataset.cat;
+        updateActiveChip();
+        renderProducts();
+        window.location.hash = '#products';
+      });
+    });
+
+    // -----------------------------
+    // Modal controls (FIXED)
+    // -----------------------------
+    const modal = document.getElementById('sell-product-modal');
+    const dialog = modal.querySelector('[role="dialog"]');
+    const openModalBtn = document.getElementById('open-sell-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const cancelModalBtn = document.getElementById('cancel-modal-btn');
+
+    function openModal() {
+      modal.classList.remove('pointer-events-none');
+      modal.classList.remove('opacity-0');
+      dialog.classList.remove('opacity-0','translate-y-6');
+      dialog.classList.add('opacity-100','translate-y-0');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      dialog.classList.remove('opacity-100','translate-y-0');
+      dialog.classList.add('opacity-0','translate-y-6');
+      modal.classList.add('opacity-0');
+      setTimeout(() => {
+        modal.classList.add('pointer-events-none');
+        document.body.style.overflow = '';
+      }, 250);
+    }
+
+    openModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // -----------------------------
+    // Sell form (mock submission)
+    // -----------------------------
+    document.getElementById('sell-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('productName').value.trim();
+      const brand = 'Community Seller';
+      const price = Number(document.getElementById('price').value || 0);
+      const category = document.getElementById('category').value;
+      const eco = document.getElementById('eco').checked;
+      const desc = document.getElementById('description').value.trim();
+
+      if (!name || !price || !category) {
+        showToast('Please fill all required fields.');
+        return;
+      }
+
+      const newItem = {
+        id: Date.now(), name, brand, price,
+        img: 'https://placehold.co/400x300/def7ec/0f5132?text=Your+Listing',
+        rating: 4.0, category, eco, badges: eco ? ['Community', 'Eco'] : ['Community']
+      };
+      PRODUCTS.unshift(newItem);
+      renderProducts();
+      reward('Listing submitted', eco);
+      showToast(`Listing posted: ${name}`);
+      closeModal();
+      e.target.reset();
+    });
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    updateActiveChip();
+    renderProducts();
+  </script>
+</body>
+</html>

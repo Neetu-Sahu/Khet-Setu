@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KhetSetu - My Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 100%);
+            min-height: 100vh;
+        }
+
+        /* Header matching dashboard */
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            gap: 0.5rem;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-5px);
+            }
+            60% {
+                transform: translateY(-2px);
+            }
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu li a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-menu li a:hover,
+        .nav-menu li a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2E7D32;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Profile picture section */
+        .profile-picture {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            margin: 0 auto 1rem;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+            animation: profilePulse 3s infinite ease-in-out;
+        }
+
+        @keyframes profilePulse {
+            0%, 100% {
+                box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 15px 40px rgba(76, 175, 80, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        .username {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-level {
+            background: linear-gradient(135deg, #FF9800, #FFC107);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* Stats section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-item {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(76, 175, 80, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2E7D32;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #4CAF50;
+            font-weight: 500;
+        }
+
+        /* Profile details */
+        .profile-details {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2E7D32;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-value {
+            color: #4CAF50;
+            font-weight: 500;
+        }
+
+        /* Achievements section */
+        .achievements {
+            grid-column: span 2;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .badge.earned {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .badge.locked {
+            opacity: 0.5;
+            background: rgba(128, 128, 128, 0.1);
+        }
+
+        .badge:hover:not(.locked) {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .badge-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Progress bars */
+        .progress-section {
+            margin: 1.5rem 0;
+        }
+
+        .progress-item {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #2E7D32;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            border-radius: 5px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Footer */
+        .footer {
+            background: #2E7D32;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .footer-text {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievements {
+                grid-column: span 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Floating animations */
+        .floating-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-leaf {
+            position: absolute;
+            font-size: 1.5rem;
+            color: rgba(76, 175, 80, 0.2);
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .floating-leaf:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .floating-leaf:nth-child(2) { top: 30%; right: 10%; animation-delay: -2s; }
+        .floating-leaf:nth-child(3) { bottom: 20%; left: 15%; animation-delay: -4s; }
+        .floating-leaf:nth-child(4) { bottom: 40%; right: 5%; animation-delay: -6s; }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg); 
+                opacity: 0.2; 
+            }
+            50% { 
+                transform: translateY(-20px) rotate(10deg); 
+                opacity: 0.4; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-leaf">🌿</div>
+        <div class="floating-leaf">🌱</div>
+        <div class="floating-leaf">🍃</div>
+        <div class="floating-leaf">🌾</div>
+    </div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                KhetSetu 🌾
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="#" onclick="openQuiz()">Quiz</a></li>
+                    <li><a href="#" onclick="showLeaderboard()">Leaderboard</a></li>
+                    <li><a href="#" onclick="showBadges()">Badges</a></li>
+                    <li><a href="#" class="active">Profile</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <a href="{{ url_for('dashboard') }}" class="back-btn">
+            ← Back to Dashboard
+        </a>
+
+        <div class="profile-container">
+            <!-- Profile Info Card -->
+            <div class="card">
+                <div class="card-title">
+                    👤 Profile Information
+                </div>
+                
+                <div class="profile-picture">
+                    <div class="avatar">
+                        👨‍🌾
+                    </div>
+                    <div class="username">{{ user.full_name or 'Farmer' }}</div>
+                    <div class="user-level">🌱 Beginner Farmer</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user.points or 0 }}</span>
+                        <span class="stat-label">Total Points</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user.sustainability_score or 0 }}</span>
+                        <span class="stat-label">Green Score</span>
+                    </div>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>Level Progress</span>
+                            <span>{{ ((user.points or 0) % 100) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ ((user.points or 0) % 100) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>Sustainability Rating</span>
+                            <span>{{ min(100, (user.sustainability_score or 0) * 2) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ min(100, (user.sustainability_score or 0) * 2) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                        ✏️ Edit Profile
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="btn btn-secondary">
+                        ⚙️ Settings
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Details Card -->
+            <div class="card">
+                <div class="card-title">
+                    📋 Personal Details
+                </div>
+                
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            📱 Phone Number
+                        </div>
+                        <div class="detail-value">{{ user.phone_number or 'Not provided' }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            🏘️ Village
+                        </div>
+                        <div class="detail-value">{{ user.village or 'Not provided' }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            🏛️ District
+                        </div>
+                        <div class="detail-value">{{ user.district or 'Not provided' }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            🗺️ State
+                        </div>
+                        <div class="detail-value">{{ user.state or 'Not provided' }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            📅 Member Since
+                        </div>
+                        <div class="detail-value">{{ user.created_at.strftime('%B %Y') if user.created_at else 'Recently joined' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Card -->
+            <div class="card achievements">
+                <div class="card-title">
+                    🏆 Achievements & Badges
+                </div>
+                
+                <div class="badges-grid">
+                    <div class="badge earned">
+                        <div class="badge-icon">🌱</div>
+                        <div class="badge-name">First Steps</div>
+                    </div>
+                    <div class="badge {{ 'earned' if user.points and user.points >= 50 else 'locked' }}">
+                        <div class="badge-icon">🌿</div>
+                        <div class="badge-name">Green Thumb</div>
+                    </div>
+                    <div class="badge {{ 'earned' if user.sustainability_score and user.sustainability_score >= 20 else 'locked' }}">
+                        <div class="badge-icon">♻️</div>
+                        <div class="badge-name">Eco Warrior</div>
+                    </div>
+                    <div class="badge {{ 'earned' if user.points and user.points >= 100 else 'locked' }}">
+                        <div class="badge-icon">🌾</div>
+                        <div class="badge-name">Harvest Master</div>
+                    </div>
+                    <div class="badge {{ 'earned' if user.sustainability_score and user.sustainability_score >= 50 else 'locked' }}">
+                        <div class="badge-icon">🏆</div>
+                        <div class="badge-name">Sustainability Champion</div>
+                    </div>
+                    <div class="badge locked">
+                        <div class="badge-icon">👑</div>
+                        <div class="badge-name">Farming Legend</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-text">
+            🌾 KhetSetu - Connecting Farmers, Knowledge & Sustainability
+        </div>
+    </footer>
+
+    <script>
+        // Progress bar animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+
+        // Placeholder functions for navigation
+        function openQuiz() {
+            alert('Quiz feature coming soon!');
+        }
+
+        function showLeaderboard() {
+            alert('Leaderboard feature coming soon!');
+        }
+
+        function showBadges() {
+            alert('Badge details feature coming soon!');
+        }
+
+        // Badge hover effects
+        document.querySelectorAll('.badge.earned').forEach(badge => {
+            badge.addEventListener('click', function() {
+                const badgeName = this.querySelector('.badge-name').textContent;
+                alert(`🎉 Achievement Unlocked: ${badgeName}!\nYou've earned this badge through your sustainable farming practices.`);
+            });
+        });
+
+        document.querySelectorAll('.badge.locked').forEach(badge => {
+            badge.addEventListener('click', function() {
+                const badgeName = this.querySelector('.badge-name').textContent;
+                alert(`🔒 ${badgeName} is locked.\nKeep practicing sustainable farming to unlock this achievement!`);
+            });
+        });
+    </script>
+</body>
+</html>

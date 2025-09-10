@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Dashboard</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for file input */
+        .file-input-button {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .file-input-hidden {
+            display: none;
+        }
+        /* Animation for dashboard activation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen antialiased">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Emergency Dashboard</h1>
+                <p id="status-text" class="text-lg text-green-400 font-medium transition-colors duration-300">Status: All Clear</p>
+            </div>
+            <div class="flex items-center bg-gray-800 p-3 rounded-lg shadow-md">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400 mr-2"><path d="M4 14a1 1 0 0 1-.78-1.63l8-10a1 1 0 0 1 1.56 0l8 10a1 1 0 0 1-.78 1.63h-4.55a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-4a1 1 0 0 0-1-1z"></path></svg>
+                <span class="text-xl font-bold">Total Points:</span>
+                <span id="total-points" class="text-xl font-bold text-blue-400 ml-2">0</span>
+            </div>
+        </header>
+
+        <!-- Simulation Controls (For Demo Purposes) -->
+        <div id="simulation-controls" class="bg-gray-800 p-4 rounded-lg mb-8 shadow-lg">
+            <h2 class="text-lg font-semibold mb-3">Demonstration Controls</h2>
+            <p class="text-sm text-gray-400 mb-4">In a real application, this would be triggered automatically by a weather detection service.</p>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="activateEmergency(1)" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Simulate Level 1 Alert</button>
+                <button onclick="activateEmergency(2)" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Simulate Level 2 Alert</button>
+                <button onclick="activateEmergency(3)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Simulate Level 3 Alert</button>
+                <button onclick="resetDashboard()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Reset to Clear</button>
+            </div>
+        </div>
+
+        <!-- Emergency Section (Hidden by default) -->
+        <main id="emergency-section" class="hidden">
+            <div id="emergency-header" class="p-6 rounded-lg mb-8 shadow-xl transition-all duration-500 fade-in">
+                <h2 class="text-4xl font-extrabold" id="emergency-level-title"></h2>
+                <p class="mt-2 text-lg" id="emergency-level-description"></p>
+            </div>
+
+            <!-- Task List -->
+            <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Task cards will be injected here by JavaScript -->
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA ---
+        const allTasks = [
+            { id: 1, description: "Check and clear rainwater drains on your property.", level: 1, points: 10, completed: false, image: null },
+            { id: 2, description: "Bring any outdoor furniture, decorations, or trash cans inside.", level: 1, points: 15, completed: false, image: null },
+            { id: 3, description: "Stock up on non-perishable food and bottled water.", level: 1, points: 20, completed: false, image: null },
+            { id: 4, description: "Secure all windows and doors. Board up if necessary.", level: 2, points: 25, completed: false, image: null },
+            { id: 5, description: "Prepare an emergency kit with flashlight, batteries, and first-aid supplies.", level: 2, points: 30, completed: false, image: null },
+            { id: 6, description: "Move valuables to a higher floor to protect from potential flooding.", level: 2, points: 20, completed: false, image: null },
+            { id: 7, description: "Turn off utilities as instructed by authorities.", level: 3, points: 50, completed: false, image: null },
+            { id: 8, description: "Evacuate to a designated shelter or higher ground if in a flood-prone area.", level: 3, points: 100, completed: false, image: null },
+            { id: 9, description: "Check on neighbors, especially the elderly or vulnerable.", level: 3, points: 40, completed: false, image: null },
+        ];
+
+        let currentTasks = [];
+        let totalPoints = 0;
+
+        // --- DOM ELEMENTS ---
+        const statusText = document.getElementById('status-text');
+        const emergencySection = document.getElementById('emergency-section');
+        const emergencyHeader = document.getElementById('emergency-header');
+        const emergencyLevelTitle = document.getElementById('emergency-level-title');
+        const emergencyLevelDescription = document.getElementById('emergency-level-description');
+        const taskListContainer = document.getElementById('task-list');
+        const totalPointsDisplay = document.getElementById('total-points');
+        const simulationControls = document.getElementById('simulation-controls');
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Activates the emergency dashboard for a specific level.
+         * @param {number} level - The emergency level (1, 2, or 3).
+         */
+        function activateEmergency(level) {
+            // Update status text and color
+            statusText.textContent = `Status: EMERGENCY LEVEL ${level} ACTIVE`;
+            statusText.classList.remove('text-green-400');
+            
+            // Set header styles based on level
+            emergencyHeader.classList.remove('bg-yellow-500', 'bg-orange-500', 'bg-red-600');
+            if (level === 1) {
+                statusText.classList.add('text-yellow-400');
+                emergencyHeader.classList.add('bg-yellow-500');
+                emergencyHeader.querySelector('h2').classList.add('text-black');
+                emergencyHeader.querySelector('p').classList.add('text-black');
+                emergencyLevelTitle.textContent = 'Level 1 Alert: Be Prepared';
+                emergencyLevelDescription.textContent = 'Minor weather event expected. Take precautionary measures now.';
+            } else if (level === 2) {
+                statusText.classList.add('text-orange-400');
+                emergencyHeader.classList.add('bg-orange-500');
+                emergencyHeader.querySelector('h2').classList.remove('text-black');
+                emergencyHeader.querySelector('p').classList.remove('text-black');
+                emergencyLevelTitle.textContent = 'Level 2 Alert: High Alert';
+                emergencyLevelDescription.textContent = 'Significant weather event is imminent. Ensure safety preparations are complete.';
+            } else {
+                statusText.classList.add('text-red-400');
+                emergencyHeader.classList.add('bg-red-600');
+                emergencyHeader.querySelector('h2').classList.remove('text-black');
+                emergencyHeader.querySelector('p').classList.remove('text-black');
+                emergencyLevelTitle.textContent = 'Level 3 Alert: Immediate Danger';
+                emergencyLevelDescription.textContent = 'Severe weather is occurring. Follow official instructions and evacuate if necessary.';
+            }
+            
+            emergencySection.classList.remove('hidden');
+            simulationControls.classList.add('opacity-50', 'pointer-events-none');
+
+
+            // Filter tasks for the current or lower levels
+            currentTasks = JSON.parse(JSON.stringify(allTasks.filter(task => task.level <= level)));
+            renderTasks();
+        }
+
+        /**
+         * Renders the list of tasks to the DOM.
+         */
+        function renderTasks() {
+            taskListContainer.innerHTML = ''; // Clear existing tasks
+            currentTasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.id = `task-${task.id}`;
+                taskCard.className = `task-card bg-gray-800 p-5 rounded-lg shadow-lg border-l-4 transition-all duration-300 ${task.completed ? 'border-green-500' : 'border-gray-600'}`;
+                
+                let imagePreview = task.image ? `<img src="${task.image}" alt="Proof" class="mt-4 rounded-lg max-h-40 w-full object-cover">` : '<div class="mt-4 h-40 bg-gray-700 rounded-lg flex items-center justify-center text-gray-500">Image Preview</div>';
+
+                taskCard.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <p class="text-lg font-medium pr-4">${task.description}</p>
+                        <div class="flex-shrink-0 text-right">
+                            <span class="font-bold text-xl text-blue-400">${task.points}</span>
+                            <span class="text-xs text-gray-400 block">POINTS</span>
+                        </div>
+                    </div>
+                    
+                    ${imagePreview}
+
+                    <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                        <label for="file-${task.id}" class="file-input-button w-full sm:w-auto flex-grow justify-center bg-gray-600 hover:bg-gray-700 text-white ${task.completed ? 'hidden' : ''}">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            Upload Image
+                        </label>
+                        <input type="file" id="file-${task.id}" accept="image/*" class="file-input-hidden" onchange="handleImageUpload(event, ${task.id})">
+                        
+                        <button onclick="completeTask(${task.id})" class="complete-btn w-full sm:w-auto flex-grow justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg ${task.completed ? 'hidden' : ''}">
+                            Mark as Complete
+                        </button>
+                    </div>
+                    <div class="status-message text-center mt-3 text-sm">
+                        ${task.completed ? '<span class="text-green-400 font-bold">✓ COMPLETED</span>' : '<span class="text-gray-400">Pending...</span>'}
+                    </div>
+                `;
+                taskListContainer.appendChild(taskCard);
+            });
+        }
+
+        /**
+         * Handles the image file upload and preview.
+         * @param {Event} event - The file input change event.
+         * @param {number} taskId - The ID of the task.
+         */
+        function handleImageUpload(event, taskId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const task = currentTasks.find(t => t.id === taskId);
+                task.image = e.target.result;
+                renderTasks(); // Re-render to show the image preview
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * Marks a task as complete and updates points.
+         * @param {number} taskId - The ID of the task to complete.
+         */
+        function completeTask(taskId) {
+            const task = currentTasks.find(t => t.id === taskId);
+            
+            if (task.completed) return; // Already completed
+
+            if (!task.image) {
+                const card = document.getElementById(`task-${task.id}`);
+                const messageEl = card.querySelector('.status-message');
+                messageEl.innerHTML = '<span class="text-red-500 font-bold">Please upload an image first!</span>';
+                setTimeout(() => {
+                   if (!task.completed) messageEl.innerHTML = '<span class="text-gray-400">Pending...</span>';
+                }, 3000);
+                return;
+            }
+
+            task.completed = true;
+            totalPoints += task.points;
+            
+            updatePointsDisplay();
+            renderTasks();
+        }
+
+        /**
+         * Updates the total points display.
+         */
+        function updatePointsDisplay() {
+            totalPointsDisplay.textContent = totalPoints;
+        }
+
+        /**
+         * Resets the dashboard to its initial "All Clear" state.
+         */
+        function resetDashboard() {
+            statusText.textContent = 'Status: All Clear';
+            statusText.className = 'text-lg text-green-400 font-medium transition-colors duration-300';
+            
+            emergencySection.classList.add('hidden');
+            simulationControls.classList.remove('opacity-50', 'pointer-events-none');
+            
+            totalPoints = 0;
+            updatePointsDisplay();
+
+            // Reset all task states for next simulation
+            allTasks.forEach(task => {
+                task.completed = false;
+                task.image = null;
+            });
+            currentTasks = [];
+            taskListContainer.innerHTML = '';
+        }
+    </script>
+
+</body>
+</html>

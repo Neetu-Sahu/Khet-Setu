@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainable Farming - Gamified Learning Platform</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a4d3a 0%, #2d7a2d 50%, #4a9b4a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .farmer-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff9800, #ffc107);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .farmer-details h2 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .farmer-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .emergency-indicator {
+            background: linear-gradient(45deg, #f44336, #e91e63);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+        
+        .emergency-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .progress-section {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .progress-title {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .progress-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-bar {
+            height: 40px;
+            background: linear-gradient(90deg, #4caf50, #8bc34a, #cddc39);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .levels-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .level-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .level-card.completed {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 2px solid #4caf50;
+        }
+        
+        .level-card.locked {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+        
+        .level-header {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, #2e7d32, #388e3c);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .level-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .level-header:hover::before {
+            left: 100%;
+        }
+        
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .level-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        
+        .level-details h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .level-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .expand-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .sublevels {
+            padding: 2rem;
+            display: none;
+            gap: 1rem;
+        }
+        
+        .sublevels.expanded {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sublevel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 4px solid #4caf50;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sublevel:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sublevel.completed {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border-left-color: #2e7d32;
+        }
+        
+        .sublevel.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .sublevel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .sublevel-info h4 {
+            color: #2e7d32;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sublevel-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .sublevel-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #ff9800, #ffc107);
+            color: white;
+        }
+        
+        .upload-btn:hover {
+            background: linear-gradient(45deg, #f57c00, #ff8f00);
+            transform: translateY(-2px);
+        }
+        
+        .complete-btn {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+        }
+        
+        .complete-btn:hover {
+            background: linear-gradient(45deg, #388e3c, #689f38);
+            transform: translateY(-2px);
+        }
+        
+        .complete-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .status-completed {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+        }
+        
+        .status-pending {
+            background: #f0f0f0;
+            color: #999;
+            border: 2px dashed #ccc;
+        }
+        
+        .photo-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #4caf50;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .photo-preview:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #4caf50;
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+        }
+        
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #2e7d32;
+        }
+        
+        .preview-container {
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .modal-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: white;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1100;
+            max-width: 300px;
+        }
+        
+        .notification.success {
+            border-left: 4px solid #4caf50;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: none;
+            z-index: 1200;
+            animation: celebrationPop 0.5s ease;
+        }
+        
+        @keyframes celebrationPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .emergency-levels {
+            background: linear-gradient(135deg, #f44336, #e91e63);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .emergency-levels.active {
+            display: block;
+            animation: emergencyAlert 1s ease;
+        }
+        
+        @keyframes emergencyAlert {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .emergency-header {
+            padding: 1.5rem 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .emergency-icon {
+            font-size: 2rem;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .levels-container {
+                padding: 1rem;
+            }
+            
+            .level-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .sublevel-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .sublevel-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="farmer-info">
+            <div class="farmer-avatar">👨‍🌾</div>
+            <div class="farmer-details">
+                <h2>Farmer: Ramesh Kumar</h2>
+                <div class="farmer-stats">
+                    <span>Level: <strong id="current-level">1</strong></span>
+                    <span>Points: <strong id="total-points">0</strong></span>
+                    <span>Completed: <strong id="completion-rate">0%</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="emergency-indicator" id="emergency-indicator">
+            🚨 Emergency Alert Active
+        </div>
+    </div>
+
+    <div class="progress-section">
+        <h1 class="progress-title">Sustainable Farming Journey</h1>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
+        </div>
+    </div>
+
+    <div class="levels-container">
+      
+        <div class="emergency-levels" id="emergency-levels">
+            <div class="emergency-header">
+                <div class="emergency-icon">🚨</div>
+                <div>
+                    <h3>Emergency Weather Protection</h3>
+                    <p>Immediate action required to protect crops!</p>
+                </div>
+            </div>
+            <div class="sublevels expanded" id="emergency-sublevels">
+               
+            </div>
+        </div>
+
+        
+        <div id="regular-levels"></div>
+    </div>
+
+  
+    <div class="modal" id="upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Task Photo</h3>
+                <p>Please upload a clear photo showing the completed task</p>
+            </div>
+            <div class="upload-zone" id="upload-zone">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+                <p>Click here or drag & drop your photo</p>
+                <small>Supported: JPG, PNG, GIF (Max 5MB)</small>
+            </div>
+            <input type="file" id="photo-input" accept="image/*" style="display: none;">
+            <div class="preview-container" id="preview-container" style="display: none;">
+                <img id="preview-image" class="preview-image" alt="Preview">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-primary" id="submit-photo">Submit Photo</button>
+                <button class="modal-btn btn-secondary" id="cancel-upload">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="notification" id="notification">
+        <div id="notification-text"></div>
+    </div>
+
+  
+    <div class="celebration" id="celebration">
+        🎉 Level Completed! Excellent Work! 🎉
+    </div>
+
+    <script>
+        // Farming levels data
+        const farmingLevels = [
+            {
+                id: 1,
+                title: "Foundation: Soil & Land Preparation",
+                icon: "🌱",
+                points: 100,
+                description: "Master the basics of sustainable soil management",
+                sublevels: [
+                    { id: "1-1", title: "Soil Testing & Analysis", description: "Test soil pH, nutrients, and composition", points: 20, keywords: ["soil", "test", "analysis", "ph", "dirt", "ground"], completed: false, photo: null, locked: false },
+                    { id: "1-2", title: "Land Clearing & Debris Removal", description: "Clear weeds, rocks, and prepare land", points: 15, keywords: ["clearing", "debris", "rocks", "weeds", "clean"], completed: false, photo: null, locked: true },
+                    { id: "1-3", title: "Organic Compost Preparation", description: "Create nutrient-rich organic compost", points: 25, keywords: ["compost", "organic", "decompose", "fertilizer", "waste"], completed: false, photo: null, locked: true },
+                    { id: "1-4", title: "Soil Tilling & Aeration", description: "Properly till soil for optimal plant growth", points: 20, keywords: ["tilling", "till", "aeration", "plow", "soil"], completed: false, photo: null, locked: true },
+                    { id: "1-5", title: "Organic Matter Integration", description: "Mix organic matter into prepared soil", points: 20, keywords: ["organic", "matter", "mix", "integration", "blend"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 2,
+                title: "Water Management & Conservation",
+                icon: "💧",
+                points: 120,
+                description: "Implement efficient irrigation and water conservation",
+                sublevels: [
+                    { id: "2-1", title: "Drip Irrigation System Setup", description: "Install water-efficient drip irrigation", points: 30, keywords: ["drip", "irrigation", "water", "pipes", "system"], completed: false, photo: null, locked: true },
+                    { id: "2-2", title: "Rainwater Harvesting System", description: "Set up rainwater collection system", points: 25, keywords: ["rainwater", "harvest", "collection", "tank", "gutter"], completed: false, photo: null, locked: true },
+                    { id: "2-3", title: "Mulching for Water Retention", description: "Apply mulch to conserve soil moisture", points: 20, keywords: ["mulch", "retention", "moisture", "cover", "straw"], completed: false, photo: null, locked: true },
+                    { id: "2-4", title: "Water Quality Testing", description: "Test irrigation water quality parameters", points: 25, keywords: ["water", "quality", "test", "pure", "clean"], completed: false, photo: null, locked: true },
+                    { id: "2-5", title: "Smart Irrigation Timer", description: "Install automated irrigation scheduling", points: 20, keywords: ["timer", "automatic", "schedule", "smart", "irrigation"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 3,
+                title: "Seed Selection & Planting",
+                icon: "🌾",
+                points: 140,
+                description: "Choose optimal seeds and planting techniques",
+                sublevels: [
+                    { id: "3-1", title: "Climate-Appropriate Seed Selection", description: "Choose seeds suitable for local climate", points: 25, keywords: ["seeds", "selection", "variety", "climate", "suitable"], completed: false, photo: null, locked: true },
+                    { id: "3-2", title: "Seed Treatment & Preparation", description: "Treat seeds for better germination", points: 20, keywords: ["seed", "treatment", "prepare", "soak", "germination"], completed: false, photo: null, locked: true },
+                    { id: "3-3", title: "Optimal Spacing & Depth Planting", description: "Plant seeds with correct spacing and depth", points: 30, keywords: ["planting", "spacing", "depth", "rows", "seeds"], completed: false, photo: null, locked: true },
+                    { id: "3-4", title: "Companion Planting Setup", description: "Plant complementary crops together", points: 35, keywords: ["companion", "planting", "together", "crops", "mixed"], completed: false, photo: null, locked: true },
+                    { id: "3-5", title: "Germination Monitoring", description: "Track and document seed germination", points: 30, keywords: ["germination", "sprouting", "monitoring", "growth", "emergence"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 4,
+                title: "Crop Nutrition & Fertilization",
+                icon: "🌿",
+                points: 160,
+                description: "Provide optimal nutrition through organic methods",
+                sublevels: [
+                    { id: "4-1", title: "Organic Fertilizer Application", description: "Apply organic fertilizers correctly", points: 30, keywords: ["fertilizer", "organic", "application", "nutrients", "feed"], completed: false, photo: null, locked: true },
+                    { id: "4-2", title: "Nitrogen Fixation with Legumes", description: "Plant nitrogen-fixing legume crops", points: 35, keywords: ["nitrogen", "legumes", "beans", "fixation", "nodules"], completed: false, photo: null, locked: true },
+                    { id: "4-3", title: "Micronutrient Supplementation", description: "Add essential micronutrients to soil", points: 30, keywords: ["micronutrients", "supplement", "minerals", "trace", "elements"], completed: false, photo: null, locked: true },
+                    { id: "4-4", title: "Vermicomposting Setup", description: "Create worm composting system", points: 35, keywords: ["vermicompost", "worms", "composting", "earthworms", "organic"], completed: false, photo: null, locked: true },
+                    { id: "4-5", title: "Foliar Feeding Program", description: "Apply liquid fertilizers to plant leaves", points: 30, keywords: ["foliar", "feeding", "spray", "leaves", "liquid"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 5,
+                title: "Pest & Disease Management",
+                icon: "🐛",
+                points: 180,
+                description: "Implement integrated pest management strategies",
+                sublevels: [
+                    { id: "5-1", title: "Beneficial Insect Habitat Creation", description: "Create habitats for beneficial insects", points: 35, keywords: ["beneficial", "insects", "habitat", "predators", "ladybugs"], completed: false, photo: null, locked: true },
+                    { id: "5-2", title: "Organic Pest Control Sprays", description: "Prepare and apply organic pest control", points: 30, keywords: ["organic", "pest", "control", "spray", "natural"], completed: false, photo: null, locked: true },
+                    { id: "5-3", title: "Disease Prevention Measures", description: "Implement crop disease prevention", points: 40, keywords: ["disease", "prevention", "fungal", "bacterial", "healthy"], completed: false, photo: null, locked: true },
+                    { id: "5-4", title: "Crop Rotation for Pest Control", description: "Rotate crops to break pest cycles", points: 45, keywords: ["rotation", "crops", "pest", "cycle", "different"], completed: false, photo: null, locked: true },
+                    { id: "5-5", title: "Monitoring & Early Detection", description: "Regular monitoring for pest and disease signs", points: 30, keywords: ["monitoring", "detection", "inspection", "signs", "symptoms"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 6,
+                title: "Growth Optimization & Care",
+                icon: "🌱",
+                points: 200,
+                description: "Optimize plant growth through proper care",
+                sublevels: [
+                    { id: "6-1", title: "Pruning & Plant Training", description: "Proper pruning and plant training techniques", points: 35, keywords: ["pruning", "training", "cutting", "branches", "shape"], completed: false, photo: null, locked: true },
+                    { id: "6-2", title: "Staking & Support Systems", description: "Install plant support structures", points: 30, keywords: ["staking", "support", "poles", "ties", "structure"], completed: false, photo: null, locked: true },
+                    { id: "6-3", title: "Weed Management Program", description: "Implement sustainable weed control", points: 40, keywords: ["weed", "control", "management", "removal", "cultivation"], completed: false, photo: null, locked: true },
+                    { id: "6-4", title: "Growth Monitoring & Documentation", description: "Track plant growth and health metrics", points: 45, keywords: ["monitoring", "growth", "measurement", "documentation", "progress"], completed: false, photo: null, locked: true },
+                    { id: "6-5", title: "Environmental Stress Management", description: "Protect plants from environmental stress", points: 50, keywords: ["stress", "protection", "environment", "weather", "shelter"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 7,
+                title: "Pollination & Biodiversity",
+                icon: "🐝",
+                points: 220,
+                description: "Enhance pollination and promote biodiversity",
+                sublevels: [
+                    { id: "7-1", title: "Pollinator Garden Creation", description: "Plant flowers to attract pollinators", points: 40, keywords: ["pollinator", "garden", "flowers", "bees", "butterflies"], completed: false, photo: null, locked: true },
+                    { id: "7-2", title: "Native Plant Integration", description: "Include native plants in farming system", points: 35, keywords: ["native", "plants", "local", "species", "indigenous"], completed: false, photo: null, locked: true },
+                    { id: "7-3", title: "Bee House Installation", description: "Install bee houses for native bees", points: 45, keywords: ["bee", "house", "installation", "native", "shelter"], completed: false, photo: null, locked: true },
+                    { id: "7-4", title: "Biodiversity Assessment", description: "Document and assess farm biodiversity", points: 50, keywords: ["biodiversity", "assessment", "species", "variety", "ecosystem"], completed: false, photo: null, locked: true },
+                    { id: "7-5", title: "Wildlife Corridor Creation", description: "Create pathways for wildlife movement", points: 50, keywords: ["wildlife", "corridor", "pathway", "movement", "habitat"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 8,
+                title: "Harvest Preparation & Techniques",
+                icon: "🌾",
+                points: 240,
+                description: "Master sustainable harvesting methods",
+                sublevels: [
+                    { id: "8-1", title: "Harvest Timing Assessment", description: "Determine optimal harvest timing", points: 40, keywords: ["harvest", "timing", "ripeness", "maturity", "ready"], completed: false, photo: null, locked: true },
+                    { id: "8-2", title: "Sustainable Harvesting Tools", description: "Use appropriate harvesting tools", points: 35, keywords: ["tools", "harvesting", "equipment", "sustainable", "implements"], completed: false, photo: null, locked: true },
+                    { id: "8-3", title: "Post-Harvest Handling", description: "Proper handling and storage of harvest", points: 50, keywords: ["post-harvest", "handling", "storage", "preservation", "quality"], completed: false, photo: null, locked: true },
+                    { id: "8-4", title: "Yield Documentation", description: "Record and analyze harvest yields", points: 55, keywords: ["yield", "documentation", "record", "analysis", "productivity"], completed: false, photo: null, locked: true },
+                    { id: "8-5", title: "Seed Saving Techniques", description: "Save seeds for next season", points: 60, keywords: ["seed", "saving", "collection", "storage", "next season"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 9,
+                title: "Sustainable Storage & Processing",
+                icon: "🏪",
+                points: 260,
+                description: "Implement eco-friendly storage and processing",
+                sublevels: [
+                    { id: "9-1", title: "Natural Storage Solutions", description: "Use natural methods for crop storage", points: 45, keywords: ["storage", "natural", "preservation", "containers", "dry"], completed: false, photo: null, locked: true },
+                    { id: "9-2", title: "Solar Drying Setup", description: "Install solar drying systems", points: 50, keywords: ["solar", "drying", "dehydration", "sun", "preservation"], completed: false, photo: null, locked: true },
+                    { id: "9-3", title: "Value Addition Processing", description: "Add value through basic processing", points: 55, keywords: ["processing", "value", "addition", "transformation", "products"], completed: false, photo: null, locked: true },
+                    { id: "9-4", title: "Quality Control Systems", description: "Implement quality control measures", points: 55, keywords: ["quality", "control", "standards", "inspection", "grading"], completed: false, photo: null, locked: true },
+                    { id: "9-5", title: "Waste Minimization", description: "Minimize waste in storage and processing", points: 55, keywords: ["waste", "minimization", "reduction", "efficiency", "loss"], completed: false, photo: null, locked: true }
+                ]
+            },
+            {
+                id: 10,
+                title: "Market Preparation & Sustainability",
+                icon: "🏪",
+                points: 300,
+                description: "Prepare for sustainable market participation",
+                sublevels: [
+                    { id: "10-1", title: "Organic Certification Process", description: "Complete organic certification requirements", points: 60, keywords: ["organic", "certification", "standards", "compliance", "verified"], completed: false, photo: null, locked: true },
+                    { id: "10-2", title: "Sustainable Packaging", description: "Use eco-friendly packaging materials", points: 50, keywords: ["packaging", "sustainable", "eco-friendly", "biodegradable", "materials"], completed: false, photo: null, locked: true },
+                    { id: "10-3", title: "Market Research & Planning", description: "Research markets and plan sales strategy", points: 60, keywords: ["market", "research", "planning", "strategy", "customers"], completed: false, photo: null, locked: true },
+                    { id: "10-4", title: "Farm-to-Consumer Setup", description: "Establish direct consumer relationships", points: 65, keywords: ["farm-to-consumer", "direct", "sales", "relationship", "local"], completed: false, photo: null, locked: true },
+                    { id: "10-5", title: "Sustainability Reporting", description: "Document and report sustainability practices", points: 65, keywords: ["sustainability", "reporting", "documentation", "practices", "impact"], completed: false, photo: null, locked: true }
+                ]
+            }
+        ];
+
+        // Emergency levels for weather protection
+        const emergencyLevels = [
+            { id: "e-1", title: "Immediate Crop Cover", description: "Cover crops with protective materials", points: 50, keywords: ["cover", "protection", "tarp", "shelter", "crops"], completed: false, photo: null },
+            { id: "e-2", title: "Drainage Channel Creation", description: "Create emergency drainage channels", points: 40, keywords: ["drainage", "channels", "water", "flow", "diversion"], completed: false, photo: null },
+            { id: "e-3", title: "Wind Barrier Installation", description: "Install temporary wind barriers", points: 45, keywords: ["wind", "barrier", "protection", "screen", "shelter"], completed: false, photo: null },
+            { id: "e-4", title: "Harvest Emergency Crops", description: "Harvest crops that can be saved", points: 60, keywords: ["harvest", "emergency", "save", "crops", "collection"], completed: false, photo: null }
+        ];
+
+        // State management
+        let currentLevel = 1;
+        let totalPoints = 0;
+        let isEmergencyActive = false;
+        let currentUploadTarget = null;
+
+        // AI-powered photo validation keywords
+        const photoValidator = {
+            analyzePhoto: function(keywords, photoData) {
+                // Simulate AI photo analysis
+                // In real implementation, this would use computer vision APIs
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Simulate analysis result (90% success rate for demo)
+                        const isValid = Math.random() > 0.1;
+                        resolve({
+                            valid: isValid,
+                            confidence: isValid ? Math.random() * 30 + 70 : Math.random() * 40 + 10,
+                            detectedObjects: isValid ? keywords.slice(0, 2) : ['unrelated', 'objects']
+                        });
+                    }, 2000);
+                });
+            }
+        };
+
+        // Initialize the application
+        function initApp() {
+            renderLevels();
+            updateProgress();
+            setupEventListeners();
+            
+            // Simulate emergency activation (demo purposes)
+            setTimeout(() => {
+                if (Math.random() > 0.7) {
+                    activateEmergency();
+                }
+            }, 10000);
+        }
+
+        // Render all levels
+        function renderLevels() {
+            const container = document.getElementById('regular-levels');
+            container.innerHTML = '';
+
+            farmingLevels.forEach(level => {
+                const levelCard = createLevelCard(level);
+                container.appendChild(levelCard);
+            });
+
+            updateLevelStates();
+        }
+
+        // Create a level card
+        function createLevelCard(level) {
+            const isCompleted = level.sublevels.every(sub => sub.completed);
+            const isLocked = level.id > currentLevel;
+
+            const card = document.createElement('div');
+            card.className = `level-card ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+            card.innerHTML = `
+                <div class="level-header" onclick="toggleLevel(${level.id})">
+                    <div class="level-info">
+                        <div class="level-icon">${level.icon}</div>
+                        <div class="level-details">
+                            <h3>${level.title}</h3>
+                            <div class="level-meta">
+                                <span>📊 ${level.points} Points</span>
+                                <span>📋 ${level.sublevels.length} Tasks</span>
+                                <span>✅ ${level.sublevels.filter(sub => sub.completed).length}/${level.sublevels.length} Done</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="expand-icon" id="expand-${level.id}">▶</div>
+                </div>
+                <div class="sublevels" id="sublevels-${level.id}">
+                    ${level.sublevels.map(sublevel => createSublevelHTML(sublevel, level.id)).join('')}
+                </div>
+            `;
+            return card;
+        }
+
+        // Create sublevel HTML
+        function createSublevelHTML(sublevel, levelId) {
+            const isLocked = sublevel.locked && !sublevel.completed;
+            return `
+                <div class="sublevel ${sublevel.completed ? 'completed' : ''} ${isLocked ? 'locked' : ''}" id="sublevel-${sublevel.id}">
+                    <div class="sublevel-header">
+                        <div class="sublevel-info">
+                            <h4>${sublevel.title}</h4>
+                            <p class="sublevel-description">${sublevel.description}</p>
+                            <small style="color: #999;">Points: ${sublevel.points}</small>
+                        </div>
+                        <div class="sublevel-actions">
+                            ${sublevel.photo ? `<img src="${sublevel.photo}" class="photo-preview" onclick="viewPhoto('${sublevel.photo}')" alt="Task photo">` : ''}
+                            <div class="status-indicator ${sublevel.completed ? 'status-completed' : 'status-pending'}">
+                                ${sublevel.completed ? '✓' : '○'}
+                            </div>
+                            ${!isLocked ? `
+                                <button class="action-btn upload-btn" onclick="openUploadModal('${sublevel.id}')" ${sublevel.completed ? 'disabled' : ''}>
+                                    📷 Upload Photo
+                                </button>
+                                <button class="action-btn complete-btn" onclick="completeSublevel('${sublevel.id}')" ${!sublevel.photo || sublevel.completed ? 'disabled' : ''}>
+                                    ✓ Complete Task
+                                </button>
+                            ` : '<span style="color: #999; font-style: italic;">🔒 Complete previous tasks to unlock</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Toggle level expansion
+        function toggleLevel(levelId) {
+            const sublevels = document.getElementById(`sublevels-${levelId}`);
+            const expandIcon = document.getElementById(`expand-${levelId}`);
+            
+            if (sublevels.style.display === 'none' || !sublevels.style.display) {
+                sublevels.style.display = 'flex';
+                sublevels.classList.add('expanded');
+                expandIcon.classList.add('expanded');
+            } else {
+                sublevels.style.display = 'none';
+                sublevels.classList.remove('expanded');
+                expandIcon.classList.remove('expanded');
+            }
+        }
+
+        // Open upload modal
+        function openUploadModal(sublevelId) {
+            currentUploadTarget = sublevelId;
+            document.getElementById('upload-modal').style.display = 'flex';
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('submit-photo').disabled = true;
+        }
+
+        // Complete sublevel
+        async function completeSublevel(sublevelId) {
+            const sublevel = findSublevel(sublevelId);
+            if (!sublevel || !sublevel.photo) {
+                showNotification('Please upload a photo first!', 'error');
+                return;
+            }
+
+            // Validate photo using AI
+            showNotification('Validating photo...', 'info');
+            const validation = await photoValidator.analyzePhoto(sublevel.keywords, sublevel.photo);
+            
+            if (validation.valid && validation.confidence > 60) {
+                sublevel.completed = true;
+                totalPoints += sublevel.points;
+                
+                // Unlock next sublevel
+                unlockNextSublevel(sublevelId);
+                
+                // Check if level is completed
+                const level = findLevel(sublevelId);
+                if (level && level.sublevels.every(sub => sub.completed)) {
+                    currentLevel = Math.max(currentLevel, level.id + 1);
+                    showCelebration();
+                }
+                
+                updateProgress();
+                renderLevels();
+                showNotification(`Task completed! +${sublevel.points} points`, 'success');
+            } else {
+                showNotification(`Photo validation failed. Please upload a relevant photo showing ${sublevel.keywords[0]} task.`, 'error');
+                sublevel.photo = null; // Reset photo
+                renderLevels();
+            }
+        }
+
+        // Find sublevel by ID
+        function findSublevel(sublevelId) {
+            for (let level of farmingLevels) {
+                const sublevel = level.sublevels.find(sub => sub.id === sublevelId);
+                if (sublevel) return sublevel;
+            }
+            return null;
+        }
+
+        // Find level by sublevel ID
+        function findLevel(sublevelId) {
+            return farmingLevels.find(level => 
+                level.sublevels.some(sub => sub.id === sublevelId)
+            );
+        }
+
+        // Unlock next sublevel
+        function unlockNextSublevel(completedSublevelId) {
+            for (let level of farmingLevels) {
+                const subIndex = level.sublevels.findIndex(sub => sub.id === completedSublevelId);
+                if (subIndex !== -1 && subIndex < level.sublevels.length - 1) {
+                    level.sublevels[subIndex + 1].locked = false;
+                    break;
+                }
+            }
+        }
+
+        // Update level states
+        function updateLevelStates() {
+            farmingLevels.forEach(level => {
+                const levelCard = document.querySelector(`#sublevels-${level.id}`).parentElement;
+                const isCompleted = level.sublevels.every(sub => sub.completed);
+                const isLocked = level.id > currentLevel;
+                
+                levelCard.className = `level-card ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+            });
+        }
+
+        // Update progress
+        function updateProgress() {
+            const totalSublevels = farmingLevels.reduce((sum, level) => sum + level.sublevels.length, 0);
+            const completedSublevels = farmingLevels.reduce((sum, level) => 
+                sum + level.sublevels.filter(sub => sub.completed).length, 0);
+            
+            const percentage = Math.round((completedSublevels / totalSublevels) * 100);
+            
+            document.getElementById('current-level').textContent = currentLevel;
+            document.getElementById('total-points').textContent = totalPoints;
+            document.getElementById('completion-rate').textContent = `${percentage}%`;
+            
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${percentage}%`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            const uploadZone = document.getElementById('upload-zone');
+            const photoInput = document.getElementById('photo-input');
+            const submitBtn = document.getElementById('submit-photo');
+            const cancelBtn = document.getElementById('cancel-upload');
+
+            // Upload zone click
+            uploadZone.addEventListener('click', () => photoInput.click());
+
+            // File input change
+            photoInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', handleDragOver);
+            uploadZone.addEventListener('drop', handleFileDrop);
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+
+            // Modal buttons
+            submitBtn.addEventListener('click', handlePhotoSubmit);
+            cancelBtn.addEventListener('click', () => {
+                document.getElementById('upload-modal').style.display = 'none';
+                currentUploadTarget = null;
+            });
+
+            // Emergency indicator
+            document.getElementById('emergency-indicator').addEventListener('click', toggleEmergency);
+        }
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                validateAndPreviewFile(file);
+            }
+        }
+
+        // Handle drag over
+        function handleDragOver(event) {
+            event.preventDefault();
+            document.getElementById('upload-zone').classList.add('dragover');
+        }
+
+        // Handle file drop
+        function handleFileDrop(event) {
+            event.preventDefault();
+            document.getElementById('upload-zone').classList.remove('dragover');
+            
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                validateAndPreviewFile(file);
+            }
+        }
+
+        // Validate and preview file
+        function validateAndPreviewFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showNotification('Please select a valid image file', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('File size must be less than 5MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('preview-image').src = e.target.result;
+                document.getElementById('preview-container').style.display = 'block';
+                document.getElementById('submit-photo').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle photo submit
+        function handlePhotoSubmit() {
+            if (!currentUploadTarget) return;
+            
+            const sublevel = findSublevel(currentUploadTarget);
+            const previewImage = document.getElementById('preview-image');
+            
+            if (sublevel && previewImage.src) {
+                sublevel.photo = previewImage.src;
+                document.getElementById('upload-modal').style.display = 'none';
+                renderLevels();
+                showNotification('Photo uploaded successfully!', 'success');
+                currentUploadTarget = null;
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notification.className = `notification ${type}`;
+            notificationText.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000);
+        }
+
+        // Show celebration
+        function showCelebration() {
+            const celebration = document.getElementById('celebration');
+            celebration.style.display = 'block';
+            
+            setTimeout(() => {
+                celebration.style.display = 'none';
+            }, 3000);
+        }
+
+        // Activate emergency mode
+        function activateEmergency() {
+            isEmergencyActive = true;
+            document.getElementById('emergency-indicator').classList.add('active');
+            
+            const emergencyContainer = document.getElementById('emergency-levels');
+            emergencyContainer.classList.add('active');
+            
+            renderEmergencyLevels();
+            showNotification('⚠️ Weather Alert: Emergency tasks activated!', 'error');
+        }
+
+        // Toggle emergency view
+        function toggleEmergency() {
+            const emergencyContainer = document.getElementById('emergency-levels');
+            if (emergencyContainer.style.display === 'none' || !emergencyContainer.style.display) {
+                emergencyContainer.style.display = 'block';
+                emergencyContainer.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                emergencyContainer.style.display = 'none';
+            }
+        }
+
+        // Render emergency levels
+        function renderEmergencyLevels() {
+            const container = document.getElementById('emergency-sublevels');
+            container.innerHTML = emergencyLevels.map(task => `
+                <div class="sublevel ${task.completed ? 'completed' : ''}" id="emergency-${task.id}">
+                    <div class="sublevel-header">
+                        <div class="sublevel-info">
+                            <h4>🚨 ${task.title}</h4>
+                            <p class="sublevel-description">${task.description}</p>
+                            <small style="color: #666;">Emergency Points: ${task.points}</small>
+                        </div>
+                        <div class="sublevel-actions">
+                            ${task.photo ? `<img src="${task.photo}" class="photo-preview" alt="Emergency task photo">` : ''}
+                            <div class="status-indicator ${task.completed ? 'status-completed' : 'status-pending'}">
+                                ${task.completed ? '✓' : '○'}
+                            </div>
+                            <button class="action-btn upload-btn" onclick="openEmergencyUpload('${task.id}')" ${task.completed ? 'disabled' : ''}>
+                                📷 Upload Photo
+                            </button>
+                            <button class="action-btn complete-btn" onclick="completeEmergencyTask('${task.id}')" ${!task.photo || task.completed ? 'disabled' : ''}>
+                                ✓ Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open emergency upload
+        function openEmergencyUpload(taskId) {
+            currentUploadTarget = `emergency-${taskId}`;
+            document.getElementById('upload-modal').style.display = 'flex';
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('submit-photo').disabled = true;
+        }
+
+        // Complete emergency task
+        async function completeEmergencyTask(taskId) {
+            const task = emergencyLevels.find(t => t.id === taskId);
+            if (!task || !task.photo) {
+                showNotification('Please upload a photo first!', 'error');
+                return;
+            }
+
+            // Validate emergency photo
+            const validation = await photoValidator.analyzePhoto(task.keywords, task.photo);
+            
+            if (validation.valid && validation.confidence > 50) {
+                task.completed = true;
+                totalPoints += task.points;
+                
+                renderEmergencyLevels();
+                updateProgress();
+                showNotification(`Emergency task completed! +${task.points} points`, 'success');
+                
+                // Check if all emergency tasks completed
+                if (emergencyLevels.every(t => t.completed)) {
+                    setTimeout(() => {
+                        showNotification('🎉 All emergency tasks completed! Crops protected!', 'success');
+                        deactivateEmergency();
+                    }, 1000);
+                }
+            } else {
+                showNotification(`Photo validation failed. Please upload a relevant photo showing ${task.keywords[0]}.`, 'error');
+                task.photo = null;
+                renderEmergencyLevels();
+            }
+        }
+
+        // Deactivate emergency mode
+        function deactivateEmergency() {
+            isEmergencyActive = false;
+            document.getElementById('emergency-indicator').classList.remove('active');
+            document.getElementById('emergency-levels').classList.remove('active');
+            
+            // Reset emergency tasks for next time
+            setTimeout(() => {
+                emergencyLevels.forEach(task => {
+                    task.completed = false;
+                    task.photo = null;
+                });
+            }, 5000);
+        }
+
+        // View photo in full screen
+        function viewPhoto(photoSrc) {
+            // Simple photo viewer implementation
+            const viewer = document.createElement('div');
+            viewer.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.9); display: flex; align-items: center;
+                justify-content: center; z-index: 2000; cursor: pointer;
+            `;
+            viewer.innerHTML = `<img src="${photoSrc}" style="max-width: 90%; max-height: 90%; border-radius: 10px;">`;
+            viewer.onclick = () => document.body.removeChild(viewer);
+            document.body.appendChild(viewer);
+        }
+
+        // Make functions global
+        window.toggleLevel = toggleLevel;
+        window.openUploadModal = openUploadModal;
+        window.completeSublevel = completeSublevel;
+        window.openEmergencyUpload = openEmergencyUpload;
+        window.completeEmergencyTask = completeEmergencyTask;
+        window.viewPhoto = viewPhoto;
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

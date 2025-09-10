@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenQuiz - Sustainable Farming Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #6ba832 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Floating leaves animation */
+        .leaf {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0 100% 0 100%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #a8e6a3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Crop Selection Screen */
+        .crop-selection {
+            display: block;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .crops-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .crop-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .crop-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .crop-card.selected {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .crop-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .crop-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .crop-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .start-btn {
+            display: block;
+            width: 200px;
+            margin: 40px auto;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Quiz Screen */
+        .quiz-screen {
+            display: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-info {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .timer {
+            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .question-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        .question-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .question {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .option.selected {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+            font-weight: bold;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.3);
+            color: white;
+            font-weight: bold;
+        }
+
+        .next-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #4caf50 0deg, #4caf50 var(--score-angle), rgba(255,255,255,0.2) var(--score-angle), rgba(255,255,255,0.2) 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(45, 80, 22, 0.9);
+            position: absolute;
+        }
+
+        .score-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .results-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #2196f3, #03a9f4);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .crops-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .crop-card {
+                min-height: 140px;
+                padding: 20px 10px;
+            }
+            
+            .crop-icon {
+                font-size: 2rem;
+            }
+            
+            .crop-name {
+                font-size: 1rem;
+            }
+            
+            .crop-desc {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Animated background leaves -->
+        <div class="leaf" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="leaf" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="leaf" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="leaf" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="leaf" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="leaf" style="left: 60%; animation-delay: 1s;"></div>
+        <div class="leaf" style="left: 70%; animation-delay: 3s;"></div>
+        <div class="leaf" style="left: 80%; animation-delay: 5s;"></div>
+        <div class="leaf" style="left: 90%; animation-delay: 7s;"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 GreenQuiz</h1>
+            <p>Master Sustainable Farming Practices</p>
+        </div>
+
+        <!-- Crop Selection Screen -->
+        <div class="crop-selection" id="cropSelection">
+            <div class="crops-grid">
+                <div class="crop-card" data-crop="coffee">
+                    <div class="crop-icon">☕</div>
+                    <div class="crop-name">Coffee</div>
+                    <div class="crop-desc">Sustainable coffee farming techniques</div>
+                </div>
+                <div class="crop-card" data-crop="wheat">
+                    <div class="crop-icon">🌾</div>
+                    <div class="crop-name">Wheat</div>
+                    <div class="crop-desc">Eco-friendly wheat cultivation</div>
+                </div>
+                <div class="crop-card" data-crop="rice">
+                    <div class="crop-icon">🌾</div>
+                    <div class="crop-name">Rice</div>
+                    <div class="crop-desc">Sustainable rice farming methods</div>
+                </div>
+                <div class="crop-card" data-crop="tomato">
+                    <div class="crop-icon">🍅</div>
+                    <div class="crop-name">Tomato</div>
+                    <div class="crop-desc">Organic tomato growing practices</div>
+                </div>
+                <div class="crop-card" data-crop="corn">
+                    <div class="crop-icon">🌽</div>
+                    <div class="crop-name">Corn</div>
+                    <div class="crop-desc">Sustainable corn production</div>
+                </div>
+                <div class="crop-card" data-crop="potato">
+                    <div class="crop-icon">🥔</div>
+                    <div class="crop-name">Potato</div>
+                    <div class="crop-desc">Eco-friendly potato farming</div>
+                </div>
+                <div class="crop-card" data-crop="carrot">
+                    <div class="crop-icon">🥕</div>
+                    <div class="crop-name">Carrot</div>
+                    <div class="crop-desc">Sustainable root vegetable farming</div>
+                </div>
+                <div class="crop-card" data-crop="apple">
+                    <div class="crop-icon">🍎</div>
+                    <div class="crop-name">Apple</div>
+                    <div class="crop-desc">Organic orchard management</div>
+                </div>
+            </div>
+            <button class="start-btn" id="startBtn" disabled>Select a Crop to Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="quiz-header">
+                <div class="quiz-info">
+                    <div class="timer" id="timer">01:00</div>
+                    <div class="question-counter" id="questionCounter">Question 1/10</div>
+                </div>
+                <div id="selectedCrop" style="font-size: 2rem;"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <button class="next-btn" id="nextBtn" disabled>Next Question</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen" id="resultsScreen">
+            <h2 style="margin-bottom: 20px;">Quiz Complete!</h2>
+            <div class="score-circle" id="scoreCircle">
+                <div class="score-text">
+                    <div class="score-number" id="scoreNumber">0</div>
+                    <div class="score-label">out of 10</div>
+                </div>
+            </div>
+            <div class="results-details" id="resultsDetails"></div>
+            <button class="restart-btn" id="restartBtn">Take Another Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = {
+            coffee: [
+                {
+                    question: "What is shade-grown coffee?",
+                    options: ["Coffee grown in darkness", "Coffee grown under tree canopy", "Coffee grown in greenhouses", "Coffee grown at night"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice helps prevent soil erosion in coffee farming?",
+                    options: ["Clear-cutting slopes", "Contour planting", "Deep tilling", "Monoculture farming"],
+                    correct: 1
+                },
+                {
+                    question: "What is the main benefit of organic coffee farming?",
+                    options: ["Higher yields", "No synthetic pesticides", "Faster growth", "Lower water usage"],
+                    correct: 1
+                },
+                {
+                    question: "Which altitude range is best for growing quality coffee?",
+                    options: ["Sea level", "1000-2000 meters", "Above 3000 meters", "Below 500 meters"],
+                    correct: 1
+                },
+                {
+                    question: "What is coffee cherry pulping?",
+                    options: ["Planting coffee seeds", "Removing fruit flesh from beans", "Drying coffee leaves", "Pruning coffee trees"],
+                    correct: 1
+                },
+                {
+                    question: "Which certification ensures sustainable coffee farming?",
+                    options: ["FDA Approved", "Fair Trade", "GMO-Free", "Vitamin Enhanced"],
+                    correct: 1
+                },
+                {
+                    question: "What is the purpose of coffee tree pruning?",
+                    options: ["Decoration", "Better air circulation and light", "Faster harvesting", "Pest attraction"],
+                    correct: 1
+                },
+                {
+                    question: "How long does it take for a coffee plant to mature?",
+                    options: ["1 year", "3-5 years", "10 years", "6 months"],
+                    correct: 1
+                },
+                {
+                    question: "Which method conserves water in coffee processing?",
+                    options: ["Wet processing only", "Honey processing", "Excessive washing", "Chemical treatment"],
+                    correct: 1
+                },
+                {
+                    question: "What is intercropping in coffee farming?",
+                    options: ["Growing only coffee", "Growing multiple crops together", "Rotating crops annually", "Growing crops separately"],
+                    correct: 1
+                }
+            ],
+            wheat: [
+                {
+                    question: "What is crop rotation's main benefit for wheat farming?",
+                    options: ["Faster growth", "Soil nutrient restoration", "Weather protection", "Pest attraction"],
+                    correct: 1
+                },
+                {
+                    question: "Which is a sustainable wheat harvesting practice?",
+                    options: ["Burning stubble", "Leaving stubble as mulch", "Deep plowing", "Chemical burning"],
+                    correct: 1
+                },
+                {
+                    question: "What is no-till farming?",
+                    options: ["Intensive plowing", "Farming without soil disturbance", "Growing without water", "Farming in winter only"],
+                    correct: 1
+                },
+                {
+                    question: "Which companion plant helps wheat farming?",
+                    options: ["Weeds", "Legumes", "Grass only", "Nothing"],
+                    correct: 1
+                },
+                {
+                    question: "What is precision agriculture in wheat farming?",
+                    options: ["Guessing techniques", "Technology-guided farming", "Traditional methods only", "Random planting"],
+                    correct: 1
+                },
+                {
+                    question: "How does cover cropping benefit wheat fields?",
+                    options: ["Competes with wheat", "Prevents soil erosion", "Attracts pests", "Reduces yield"],
+                    correct: 1
+                },
+                {
+                    question: "What is integrated pest management (IPM)?",
+                    options: ["Using only pesticides", "Combining multiple pest control methods", "Ignoring pests", "Using maximum chemicals"],
+                    correct: 1
+                },
+                {
+                    question: "Which irrigation method conserves water for wheat?",
+                    options: ["Flood irrigation", "Drip irrigation", "Sprinkler over-watering", "Rain dancing"],
+                    correct: 1
+                },
+                {
+                    question: "What indicates healthy wheat soil?",
+                    options: ["Hard compaction", "Good organic matter content", "No earthworms", "Gray color"],
+                    correct: 1
+                },
+                {
+                    question: "When should wheat be harvested for best quality?",
+                    options: ["When green", "At optimal moisture content", "When overripe", "Never"],
+                    correct: 1
+                }
+            ],
+            rice: [
+                {
+                    question: "What is the System of Rice Intensification (SRI)?",
+                    options: ["Traditional flooding", "Method using less water and plants", "Chemical farming", "Organic pesticides only"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice reduces methane emissions in rice farming?",
+                    options: ["Continuous flooding", "Alternate wetting and drying", "Deep water cultivation", "Chemical fertilizers"],
+                    correct: 1
+                },
+                {
+                    question: "What is direct seeded rice (DSR)?",
+                    options: ["Transplanting seedlings", "Sowing seeds directly in field", "Hydroponic growing", "Container farming"],
+                    correct: 1
+                },
+                {
+                    question: "Which nutrient management is sustainable for rice?",
+                    options: ["Only chemical fertilizers", "Integrated nutrient management", "No fertilizers", "Only pesticides"],
+                    correct: 1
+                },
+                {
+                    question: "What is the benefit of rice-fish farming?",
+                    options: ["Fish compete with rice", "Fish provide natural fertilizer and pest control", "Fish eat rice", "No benefits"],
+                    correct: 1
+                },
+                {
+                    question: "How does laser land leveling help rice farming?",
+                    options: ["Makes fields uneven", "Ensures uniform water distribution", "Creates drainage problems", "Increases weeds"],
+                    correct: 1
+                },
+                {
+                    question: "What is aerobic rice cultivation?",
+                    options: ["Growing rice underwater", "Growing rice without standing water", "Growing rice in air", "Growing rice in space"],
+                    correct: 1
+                },
+                {
+                    question: "Which technology helps in precise rice farming?",
+                    options: ["Guesswork", "GPS and sensors", "Traditional methods only", "Weather prediction"],
+                    correct: 1
+                },
+                {
+                    question: "What is brown manuring in rice?",
+                    options: ["Using brown fertilizer", "Growing and incorporating green crops", "Changing rice color", "Soil browning"],
+                    correct: 1
+                },
+                {
+                    question: "How does organic rice farming benefit the environment?",
+                    options: ["Increases pollution", "Reduces chemical contamination", "Harms wildlife", "Uses more water"],
+                    correct: 1
+                }
+            ],
+            tomato: [
+                {
+                    question: "What is companion planting for tomatoes?",
+                    options: ["Growing tomatoes alone", "Growing beneficial plants together", "Competing plants", "Random planting"],
+                    correct: 1
+                },
+                {
+                    question: "Which plant is a good companion for tomatoes?",
+                    options: ["Black walnut", "Basil", "Fennel", "Corn"],
+                    correct: 1
+                },
+                {
+                    question: "What is mulching in tomato farming?",
+                    options: ["Removing soil cover", "Adding protective ground cover", "Deep watering", "Pruning leaves"],
+                    correct: 1
+                },
+                {
+                    question: "How does drip irrigation benefit tomato growing?",
+                    options: ["Wastes water", "Delivers water directly to roots", "Floods the field", "Reduces growth"],
+                    correct: 1
+                },
+                {
+                    question: "What is biological pest control for tomatoes?",
+                    options: ["Chemical pesticides only", "Using natural predators", "Ignoring pests", "Burning plants"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice improves tomato soil health?",
+                    options: ["Soil compaction", "Adding compost", "Removing organic matter", "Overwatering"],
+                    correct: 1
+                },
+                {
+                    question: "What is crop rotation benefit for tomatoes?",
+                    options: ["Same nutrients depletion", "Breaking pest and disease cycles", "No benefits", "Soil damage"],
+                    correct: 1
+                },
+                {
+                    question: "How should tomato plants be supported sustainably?",
+                    options: ["No support needed", "Using biodegradable stakes and ties", "Plastic ties only", "Chemical supports"],
+                    correct: 1
+                },
+                {
+                    question: "What is the benefit of determinate vs indeterminate tomatoes?",
+                    options: ["No difference", "Harvest timing and space optimization", "Color difference", "Taste only"],
+                    correct: 1
+                },
+                {
+                    question: "Which harvesting practice maintains tomato quality?",
+                    options: ["Picking when green", "Harvesting at proper ripeness", "Leaving on plant too long", "Random picking"],
+                    correct: 1
+                }
+            ],
+            corn: [
+                {
+                    question: "What is sustainable corn farming's main goal?",
+                    options: ["Maximum chemical use", "Environmental and economic balance", "Fastest growth", "Highest cost"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice reduces soil erosion in corn fields?",
+                    options: ["Removing vegetation", "Conservation tillage", "Deep plowing", "Bare soil maintenance"],
+                    correct: 1
+                },
+                {
+                    question: "What is the three sisters planting method?",
+                    options: ["Three corn varieties", "Corn, beans, and squash together", "Three farming tools", "Three seasons"],
+                    correct: 1
+                },
+                {
+                    question: "How does nitrogen fixation help corn farming?",
+                    options: ["Depletes soil", "Legume companions provide nitrogen", "Needs more chemicals", "Reduces growth"],
+                    correct: 1
+                },
+                {
+                    question: "What is integrated pest management (IPM) for corn?",
+                    options: ["Pesticides only", "Multiple sustainable pest control methods", "No pest control", "Maximum chemicals"],
+                    correct: 1
+                },
+                {
+                    question: "Which water management practice is sustainable for corn?",
+                    options: ["Flood irrigation", "Efficient scheduling and methods", "Continuous watering", "No water management"],
+                    correct: 1
+                },
+                {
+                    question: "What is precision agriculture in corn farming?",
+                    options: ["Random application", "Technology-guided resource application", "Traditional methods only", "Guessing"],
+                    correct: 1
+                },
+                {
+                    question: "How does cover cropping benefit corn fields?",
+                    options: ["Competes with corn", "Improves soil health", "Attracts pests", "Reduces nutrients"],
+                    correct: 1
+                },
+                {
+                    question: "What is sustainable corn harvesting?",
+                    options: ["Leaving residue for soil", "Removing all plant material", "Burning fields", "Chemical treatment"],
+                    correct: 0
+                },
+                {
+                    question: "Which fertilizer approach is most sustainable for corn?",
+                    options: ["Maximum synthetic fertilizers", "Balanced organic and synthetic", "No fertilizers", "Random application"],
+                    correct: 1
+                }
+            ],
+            potato: [
+                {
+                    question: "What is the most sustainable way to plant potatoes?",
+                    options: ["Deep plowing every season", "No-till or minimal tillage", "Maximum soil disturbance", "Chemical soil treatment"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice helps prevent potato blight naturally?",
+                    options: ["Overhead watering", "Proper air circulation and spacing", "Dense planting", "Wet soil conditions"],
+                    correct: 1
+                },
+                {
+                    question: "What is crop rotation's benefit for potatoes?",
+                    options: ["No benefits", "Breaking disease and pest cycles", "Same family rotation", "Continuous potato growing"],
+                    correct: 1
+                },
+                {
+                    question: "Which companion plant benefits potato farming?",
+                    options: ["Tomatoes", "Beans and peas", "Other nightshades", "Weeds"],
+                    correct: 1
+                },
+                {
+                    question: "What is sustainable potato storage?",
+                    options: ["Chemical preservation", "Proper temperature and humidity control", "Open air storage", "Plastic wrapping"],
+                    correct: 1
+                },
+                {
+                    question: "How does organic matter benefit potato soil?",
+                    options: ["No benefits", "Improves soil structure and nutrition", "Attracts pests", "Reduces yield"],
+                    correct: 1
+                },
+                {
+                    question: "What is integrated pest management for potatoes?",
+                    options: ["Chemical spraying only", "Combining biological and cultural controls", "Ignoring pests", "Maximum pesticide use"],
+                    correct: 1
+                },
+                {
+                    question: "Which irrigation method is best for potatoes?",
+                    options: ["Flood irrigation", "Drip or furrow irrigation", "Overhead sprinklers", "No irrigation"],
+                    correct: 1
+                },
+                {
+                    question: "What indicates the right time to harvest potatoes?",
+                    options: ["When plants are green", "When plant tops die back", "Random timing", "When soil is wet"],
+                    correct: 1
+                },
+                {
+                    question: "How does cover cropping help potato farming?",
+                    options: ["Competes with potatoes", "Improves soil health between seasons", "Attracts pests", "Reduces soil nutrients"],
+                    correct: 1
+                }
+            ],
+            carrot: [
+                {
+                    question: "What soil type is best for sustainable carrot growing?",
+                    options: ["Heavy clay soil", "Well-drained sandy loam", "Waterlogged soil", "Rocky soil"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice helps prevent carrot root deformation?",
+                    options: ["Heavy soil compaction", "Proper soil preparation and drainage", "Deep clay layers", "Stone-filled soil"],
+                    correct: 1
+                },
+                {
+                    question: "What is succession planting for carrots?",
+                    options: ["Planting once per year", "Multiple plantings for continuous harvest", "Planting in one season only", "Random planting times"],
+                    correct: 1
+                },
+                {
+                    question: "Which companion plant benefits carrot growth?",
+                    options: ["Dill", "Onions", "Chives", "All of the above"],
+                    correct: 3
+                },
+                {
+                    question: "What is the best way to control carrot fly naturally?",
+                    options: ["Chemical pesticides", "Row covers and companion planting", "Ignoring the problem", "Deep soil cultivation"],
+                    correct: 1
+                },
+                {
+                    question: "How should carrots be watered sustainably?",
+                    options: ["Heavy daily watering", "Deep, infrequent watering", "No watering needed", "Constant moisture"],
+                    correct: 1
+                },
+                {
+                    question: "What is the benefit of thinning carrot seedlings?",
+                    options: ["No benefits", "Allows proper root development", "Wastes seeds", "Creates more work"],
+                    correct: 1
+                },
+                {
+                    question: "When should carrots be harvested for best quality?",
+                    options: ["As soon as they germinate", "When they reach desired size", "Only when overgrown", "Never"],
+                    correct: 1
+                },
+                {
+                    question: "How does mulching benefit carrot growing?",
+                    options: ["Attracts pests", "Retains moisture and suppresses weeds", "Competes with carrots", "No benefits"],
+                    correct: 1
+                },
+                {
+                    question: "What is sustainable carrot seed saving?",
+                    options: ["Buying seeds always", "Letting some plants go to seed", "Hybrid varieties only", "Chemical treatment"],
+                    correct: 1
+                }
+            ],
+            apple: [
+                {
+                    question: "What is integrated pest management (IPM) in apple orchards?",
+                    options: ["Using only pesticides", "Combining biological, cultural, and chemical controls", "Ignoring all pests", "Maximum chemical application"],
+                    correct: 1
+                },
+                {
+                    question: "Which practice promotes beneficial insects in apple orchards?",
+                    options: ["Monoculture planting", "Diverse flowering plants", "Chemical spraying", "Removing all vegetation"],
+                    correct: 1
+                },
+                {
+                    question: "What is the purpose of apple tree pruning?",
+                    options: ["Decoration only", "Improve air circulation and light penetration", "Make trees smaller", "Remove all branches"],
+                    correct: 1
+                },
+                {
+                    question: "How does cover cropping benefit apple orchards?",
+                    options: ["Competes with trees", "Improves soil health and prevents erosion", "Attracts harmful pests", "Reduces fruit quality"],
+                    correct: 1
+                },
+                {
+                    question: "What is sustainable apple tree spacing?",
+                    options: ["Plant trees very close together", "Proper spacing for air circulation", "Random spacing", "Maximum density planting"],
+                    correct: 1
+                },
+                {
+                    question: "Which method helps control apple scab naturally?",
+                    options: ["Increasing humidity", "Proper sanitation and resistant varieties", "Overhead watering", "Dense canopy"],
+                    correct: 1
+                },
+                {
+                    question: "What is the benefit of apple tree grafting?",
+                    options: ["No benefits", "Combines desired traits", "Makes trees weaker", "Reduces fruit quality"],
+                    correct: 1
+                },
+                {
+                    question: "How should apple orchards be irrigated sustainably?",
+                    options: ["Flood irrigation", "Drip or micro-sprinkler systems", "No irrigation", "Daily overhead watering"],
+                    correct: 1
+                },
+                {
+                    question: "What is organic certification for apples?",
+                    options: ["Marketing gimmick", "Standards for chemical-free production", "Higher prices only", "Government control"],
+                    correct: 1
+                },
+                {
+                    question: "When should apples be harvested for best storage?",
+                    options: ["When underripe", "At optimal maturity", "When overripe", "Any time"],
+                    correct: 1
+                }
+            ]
+        };
+
+        // Game state
+        let selectedCrop = '';
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 60;
+        let timer = null;
+        let userAnswers = [];
+
+        // Elements
+        const cropCards = document.querySelectorAll('.crop-card');
+        const startBtn = document.getElementById('startBtn');
+        const cropSelection = document.getElementById('cropSelection');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const timerEl = document.getElementById('timer');
+        const questionCounter = document.getElementById('questionCounter');
+        const selectedCropEl = document.getElementById('selectedCrop');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreCircle = document.getElementById('scoreCircle');
+        const scoreNumber = document.getElementById('scoreNumber');
+        const resultsDetails = document.getElementById('resultsDetails');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Event listeners
+        cropCards.forEach(card => {
+            card.addEventListener('click', selectCrop);
+        });
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restart);
+
+        function selectCrop(e) {
+            cropCards.forEach(card => card.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            selectedCrop = e.currentTarget.dataset.crop;
+            startBtn.disabled = false;
+            startBtn.textContent = `Start ${e.currentTarget.querySelector('.crop-name').textContent} Quiz`;
+        }
+
+        function startQuiz() {
+            cropSelection.style.display = 'none';
+            quizScreen.style.display = 'block';
+            
+            // Set crop icon
+            const cropIcons = {
+                coffee: '☕',
+                wheat: '🌾',
+                rice: '🌾',
+                tomato: '🍅',
+                corn: '🌽',
+                potato: '🥔',
+                carrot: '🥕',
+                apple: '🍎'
+            };
+            selectedCropEl.textContent = cropIcons[selectedCrop];
+            
+            // Reset game state
+            currentQuestion = 0;
+            score = 0;
+            timeLeft = 60;
+            userAnswers = [];
+            
+            // Start timer
+            startTimer();
+            showQuestion();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 10) {
+                timerEl.style.background = 'linear-gradient(45deg, #ff1744, #ff5722)';
+            }
+        }
+
+        function showQuestion() {
+            const question = quizData[selectedCrop][currentQuestion];
+            questionCounter.textContent = `Question ${currentQuestion + 1}/10`;
+            questionEl.textContent = question.question;
+            
+            optionsEl.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', () => selectOption(index));
+                optionsEl.appendChild(optionEl);
+            });
+            
+            nextBtn.disabled = true;
+            nextBtn.textContent = currentQuestion === 9 ? 'Finish Quiz' : 'Next Question';
+        }
+
+        function selectOption(selectedIndex) {
+            const options = optionsEl.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                option.classList.remove('selected');
+                if (index === selectedIndex) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            userAnswers[currentQuestion] = selectedIndex;
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            const question = quizData[selectedCrop][currentQuestion];
+            const selectedAnswer = userAnswers[currentQuestion];
+            
+            if (selectedAnswer === question.correct) {
+                score++;
+            }
+            
+            currentQuestion++;
+            
+            if (currentQuestion >= 10) {
+                endQuiz();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timer);
+            quizScreen.style.display = 'none';
+            resultsScreen.style.display = 'block';
+            
+            showResults();
+        }
+
+        function showResults() {
+            // Update score circle
+            const percentage = (score / 10) * 100;
+            const angle = (percentage / 100) * 360;
+            scoreCircle.style.setProperty('--score-angle', `${angle}deg`);
+            scoreNumber.textContent = score;
+            
+            // Show detailed results
+            let resultsHTML = `<h3>Quiz Results for ${selectedCrop.charAt(0).toUpperCase() + selectedCrop.slice(1)}</h3>`;
+            resultsHTML += `<p><strong>Score:</strong> ${score}/10 (${percentage}%)</p>`;
+            resultsHTML += `<p><strong>Time Used:</strong> ${60 - timeLeft} seconds</p>`;
+            
+            if (percentage >= 80) {
+                resultsHTML += `<p style="color: #4caf50; font-size: 1.2rem; margin: 20px 0;">🎉 Excellent! You're a sustainable farming expert!</p>`;
+            } else if (percentage >= 60) {
+                resultsHTML += `<p style="color: #ff9800; font-size: 1.2rem; margin: 20px 0;">👍 Good job! Keep learning about sustainable practices.</p>`;
+            } else {
+                resultsHTML += `<p style="color: #f44336; font-size: 1.2rem; margin: 20px 0;">📚 Keep studying! Sustainable farming needs more practice.</p>`;
+            }
+            
+            resultsHTML += `<div style="text-align: left; margin-top: 30px;">`;
+            resultsHTML += `<h4>Question Review:</h4>`;
+            
+            quizData[selectedCrop].forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                resultsHTML += `<div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; border-left: 4px solid ${isCorrect ? '#4caf50' : '#f44336'};">`;
+                resultsHTML += `<p><strong>Q${index + 1}:</strong> ${question.question}</p>`;
+                
+                if (!isCorrect) {
+                    resultsHTML += `<p style="color: #f44336;">❌ Your answer: ${question.options[userAnswer] || 'Not answered'}</p>`;
+                    resultsHTML += `<p style="color: white; font-weight: bold;">✅ Correct answer: ${question.options[question.correct]}</p>`;
+                } else {
+                    resultsHTML += `<p style="color: #4caf50;">✅ Correct!</p>`;
+                }
+                resultsHTML += `</div>`;
+            });
+            
+            resultsHTML += `</div>`;
+            resultsDetails.innerHTML = resultsHTML;
+        }
+
+        function restart() {
+            resultsScreen.style.display = 'none';
+            cropSelection.style.display = 'block';
+            
+            // Reset selections
+            cropCards.forEach(card => card.classList.remove('selected'));
+            selectedCrop = '';
+            startBtn.disabled = true;
+            startBtn.textContent = 'Select a Crop to Start Quiz';
+            
+            // Reset timer display
+            timerEl.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
+        }
+    </script>
+</body>
+</html>

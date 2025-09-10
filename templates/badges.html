@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Farming Badges</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #4CAF50, #1B5E20);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    header {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .badges-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(6px);
+    }
+
+    .badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .badge img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 16px;
+    }
+
+    .badge-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #FFEB3B;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .badge-person {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #bbdefb;
+    }
+
+    .badge-benefits {
+      list-style: none;
+      padding-left: 0;
+      text-align: left;
+      font-size: 14px;
+      color: #e0f2f1;
+    }
+
+    .badge-benefits li::before {
+      content: "🌾 ";
+    }
+
+    .back-link {
+      margin-top: 30px;
+      color: #fff;
+      text-decoration: underline;
+      font-size: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .badges-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .badges-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>🏅 Farmer Achievement Badges</header>
+
+  <div class="badges-container" id="badges-container">
+    <!-- Dynamic badge cards -->
+  </div>
+
+  <a class="back-link" href="index.html">← Back to Dashboard</a>
+
+  <script>
+    const badges = [
+      {
+        title: "Soil Master",
+        person: "Person 1",
+        icon: "https://img.icons8.com/color/96/plant-under-sun.png",
+        benefits: [
+          "1-year free soil testing",
+          "Access to premium fertilizer tips",
+          "Soil health analysis reports",
+          "Dedicated agri-support",
+          "Eligible for soil seminars"
+        ]
+      },
+      {
+        title: "Water Warrior",
+        person: "Person 2",
+        icon: "https://img.icons8.com/color/96/sprinkler.png",
+        benefits: [
+          "Free irrigation audit",
+          "Smart watering guide",
+          "Access to water-saving tools",
+          "Invitation to irrigation expo",
+          "50% off on drip kits"
+        ]
+      },
+      {
+        title: "Rotation Expert",
+        person: "Person 3",
+        icon: "https://img.icons8.com/color/96/greenhouse.png",
+        benefits: [
+          "Crop rotation planner",
+          "Soil recovery insights",
+          "Fungal disease prevention kit",
+          "Exclusive seasonal guides",
+          "Rotation mentorship access"
+        ]
+      },
+      {
+        title: "Proof Provider",
+        person: "Person 4",
+        icon: "https://img.icons8.com/color/96/image.png",
+        benefits: [
+          "Photo contest eligibility",
+          "Get featured on home page",
+          "Free photography workshop",
+          "Access to visual reporting tools",
+          "Certificate of authenticity"
+        ]
+      },
+      {
+        title: "Crisis Manager",
+        person: "Person 5",
+        icon: "https://img.icons8.com/color/96/emergency.png",
+        benefits: [
+          "24/7 emergency assistance",
+          "Natural disaster relief fund access",
+          "Faster issue response",
+          "Emergency farm insurance plan",
+          "Priority messaging in app"
+        ]
+      },
+      {
+        title: "Harvest Hero",
+        person: "Person 6",
+        icon: "https://img.icons8.com/color/96/rice-bowl.png", // Replaced
+        benefits: [
+          "Bonus harvest bonus points",
+          "Access to market deals",
+          "Free produce packaging kit",
+          "Harvest planning tool",
+          "Sell directly to vendors"
+        ]
+      },
+      {
+        title: "Tech-Savvy Farmer",
+        person: "Person 7",
+        icon: "https://img.icons8.com/color/96/robot-2.png", // Replaced
+        benefits: [
+          "Free access to farming app tools",
+          "Join agri-tech beta programs",
+          "Smart farming device discounts",
+          "Live data dashboards",
+          "AI-powered farming reports"
+        ]
+      },
+      {
+        title: "Eco Protector",
+        person: "Person 8",
+        icon: "https://img.icons8.com/color/96/deciduous-tree.png", // Replaced
+        benefits: [
+          "Free tree saplings",
+          "Join eco ambassador club",
+          "Carbon offset rewards",
+          "Environment-friendly farming kit",
+          "Community recognition badge"
+        ]
+      }
+    ];
+
+    const container = document.getElementById('badges-container');
+
+    badges.forEach(badge => {
+      const badgeEl = document.createElement('div');
+      badgeEl.className = 'badge';
+
+      const img = `<img src="${badge.icon}" alt="${badge.title}">`;
+      const title = `<div class="badge-title">${badge.title}</div>`;
+      const person = `<div class="badge-person">🏷️ Awarded to: <strong>${badge.person}</strong></div>`;
+      const benefits = `
+        <ul class="badge-benefits">
+          ${badge.benefits.map(b => `<li>${b}</li>`).join('')}
+        </ul>
+      `;
+
+      badgeEl.innerHTML = img + title + person + benefits;
+      container.appendChild(badgeEl);
+    });
+  </script>
+
+</body>
+</html>

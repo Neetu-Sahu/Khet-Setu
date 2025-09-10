@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Splash Screen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Logo animation */
+    .logo-container {
+      opacity: 0;
+      animation: fadeIn 1.5s ease forwards, pulse 2.5s infinite ease-in-out;
+    }
+
+    .logo-container img {
+      width: 200px;
+      height: auto;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.7));
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8)); }
+      50% { transform: scale(1.1); filter: drop-shadow(0 0 40px rgba(255, 255, 255, 1)); }
+    }
+
+    /* Slogan animation */
+    .slogan {
+      margin-top: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1B5E20; /* Dark green */
+      opacity: 0;
+      transform: translateY(20px);
+      text-align: center;
+    }
+
+    .show-slogan {
+      animation: fadeSlide 2s forwards;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Fade out splash before redirect */
+    .fade-out {
+      animation: fadeOut 1s forwards;
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container" id="logo">
+    <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo">
+  </div>
+
+  <div class="slogan" id="slogan">
+    Bridging farmers with the future!
+  </div>
+
+  <script>
+    // Show slogan after logo animation
+    setTimeout(() => {
+      document.getElementById("slogan").classList.add("show-slogan");
+    }, 1500); // After 1.5s
+
+    // Fade out splash and redirect to login
+    setTimeout(() => {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = "{{ url_for('login') }}";
+      }, 1000);
+    }, 5000); // Total splash duration
+  </script>
+</body>
+</html>

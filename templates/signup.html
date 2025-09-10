@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KhetSetu - Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.8), rgba(107, 142, 35, 0.8)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="farm" patternUnits="userSpaceOnUse" width="120" height="120"><rect width="120" height="120" fill="%23228B22"/><path d="M10,100 Q20,90 30,100 Q40,90 50,100 Q60,90 70,100 Q80,90 90,100 Q100,90 110,100" stroke="%23FFD700" stroke-width="2" fill="none"/><circle cx="15" cy="105" r="2" fill="%238B4513"/><circle cx="45" cy="105" r="2" fill="%238B4513"/><circle cx="75" cy="105" r="2" fill="%238B4513"/><circle cx="105" cy="105" r="2" fill="%238B4513"/><path d="M20,110 L30,105 L40,110 L50,105 L60,110 L70,105 L80,110 L90,105 L100,110" stroke="%2332CD32" stroke-width="3"/><path d="M30,20 L35,15 L40,20 M30,25 L35,20 L40,25 M30,30 L35,25 L40,30" stroke="%23FF6B6B" stroke-width="2" fill="none"/><path d="M80,25 L85,20 L90,25 M80,30 L85,25 L90,30 M80,35 L85,30 L90,35" stroke="%23FF6B6B" stroke-width="2" fill="none"/></pattern></defs><rect width="100%" height="100%" fill="url(%23farm)"/></svg>') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* Animated background elements */
+        .floating-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .farm-element {
+            position: absolute;
+            font-size: 20px;
+            animation: farmFloat 8s ease-in-out infinite;
+            opacity: 0.8;
+        }
+
+        .farm-element:nth-child(1) { top: 5%; left: 8%; animation-delay: 0s; }
+        .farm-element:nth-child(2) { top: 15%; right: 12%; animation-delay: -2s; }
+        .farm-element:nth-child(3) { bottom: 25%; left: 10%; animation-delay: -4s; }
+        .farm-element:nth-child(4) { bottom: 15%; right: 8%; animation-delay: -6s; }
+        .farm-element:nth-child(5) { top: 40%; left: 3%; animation-delay: -1s; }
+        .farm-element:nth-child(6) { top: 60%; right: 5%; animation-delay: -3s; }
+
+        @keyframes farmFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.6; }
+            33% { transform: translateY(-15px) rotate(3deg) scale(1.1); opacity: 0.8; }
+            66% { transform: translateY(10px) rotate(-2deg) scale(0.9); opacity: 0.9; }
+        }
+
+        .signup-container {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            width: 500px;
+            max-width: 95%;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            position: relative;
+            animation: slideInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(60px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            font-size: 32px;
+            color: #2E7D32;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .logo::after {
+            content: "🌱";
+            animation: grow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .subtitle {
+            color: #2E7D32;
+            font-size: 14px;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            position: relative;
+        }
+
+        .form-group.full-width {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            color: #2E7D32;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 2px solid rgba(46, 125, 50, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2E7D32;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.25);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 32px;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32, #1B5E20);
+            color: white;
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #2E7D32;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #D32F2F;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #2E7D32;
+            text-shadow: 0 1px 3px rgba(46, 125, 50, 0.3);
+        }
+
+        /* Custom scrollbar */
+        .signup-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .signup-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .signup-container::-webkit-scrollbar-thumb {
+            background: rgba(76, 175, 80, 0.6);
+            border-radius: 3px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .signup-container {
+                padding: 25px 20px;
+                margin: 10px;
+                width: calc(100% - 20px);
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .logo {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background elements -->
+    <div class="floating-elements">
+        <div class="farm-element">🌾</div>
+        <div class="farm-element">🚜</div>
+        <div class="farm-element">🌽</div>
+        <div class="farm-element">🥕</div>
+        <div class="farm-element">🍅</div>
+        <div class="farm-element">🌱</div>
+    </div>
+
+    <div class="signup-container">
+        <div class="logo-container">
+            <div class="logo">Join KhetSetu</div>
+            <div class="subtitle">Start Your Sustainable Farming Journey</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-group full-width">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Create your unique username" required>
+                <span class="input-icon">👤</span>
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Enter your full name" required>
+                <span class="input-icon">👨‍🌾</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" name="phone" class="form-control" placeholder="Your phone number" required>
+                    <span class="input-icon">📱</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required>
+                    <span class="input-icon">🔒</span>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label">Village</label>
+                <input type="text" name="village" class="form-control" placeholder="Your village name" required>
+                <span class="input-icon">🏘️</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">District</label>
+                    <input type="text" name="district" class="form-control" placeholder="Your district" required>
+                    <span class="input-icon">🏛️</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <input type="text" name="state" class="form-control" placeholder="Your state" required>
+                    <span class="input-icon">📍</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                🌱 Create KhetSetu Account
+            </button>
+        </form>
+
+        <div class="divider">Already have an account?</div>
+
+        <a href="{{ url_for('login') }}">
+            <button type="button" class="btn btn-secondary">
+                🚀 Login to KhetSetu
+            </button>
+        </a>
+
+        <div class="back-link">
+            <a href="{{ url_for('login') }}">← Back to Login</a>
+        </div>
+    </div>
+</body>
+</html>
