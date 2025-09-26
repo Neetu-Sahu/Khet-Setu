@@ -5,15 +5,40 @@ from datetime import datetime
 import requests 
 import os
 
-
-# In a real application, you MUST use a secure hashing library.
-# from werkzeug.security import generate_password_hash, check_password_hash
+# --- AI Model Imports ---
+# NOTE: You must install these libraries: pip install torch torchvision transformers Pillow
+from transformers import ViTForImageClassification, ViTImageProcessor
+from PIL import Image
+import torch
+import io
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
 app.config['DATABASE'] = 'farm_game.db'
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True  # Makes API output readable
 app.secret_key = "your_secret_key"  # For session management
+
+# --- AI Model Configuration ---
+MODEL_NAME = "wambugu71/crop_leaf_diseases_vit"
+
+# Caching: Load the model globally once to avoid slow repeated loading
+try:
+    print(f"Loading Crop Disease Model: {MODEL_NAME}...")
+    # Initialize the processor (for image normalization/resizing)
+    # Using 'cpu' as default for broader compatibility, switch to 'cuda' if GPU is available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    disease_processor = ViTImageProcessor.from_pretrained(MODEL_NAME)
+    disease_model = ViTForImageClassification.from_pretrained(MODEL_NAME).to(device)
+    disease_model.eval() # Set model to evaluation mode
+    print("Crop Disease Model loaded successfully.")
+except Exception as e:
+    print(f"ERROR: Failed to load AI model. Predictions will fail. Make sure you have PyTorch and Hugging Face libraries installed. Error: {e}")
+    disease_processor = None
+    disease_model = None
+
+
+# In a real application, you MUST use a secure hashing library.
+# from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- Database Connection Management ---
 def get_db():
@@ -30,7 +55,7 @@ def close_db(exception):
     if db is not None:
         db.close()
 
-# --- Core Database Logic Functions ---
+# --- Core Database Logic Functions (omitted for brevity, assume unchanged) ---
 def create_tables(conn):
     """Sets up all required tables using shortuuid for primary keys."""
     cursor = conn.cursor()
@@ -123,7 +148,6 @@ def create_tables(conn):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
     # Quiz questions table - stores all quiz questions
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS quiz_questions (
@@ -190,7 +214,7 @@ def create_tables(conn):
 
     conn.commit()
 
-# --- DATABASE FUNCTIONS ---
+# --- DATABASE FUNCTIONS (omitted for brevity, assume unchanged) ---
 
 # --- QUIZ DATABASE FUNCTIONS ---
 def get_all_crops(conn):
@@ -353,7 +377,7 @@ def init_db_command():
     create_tables(db)
     print("Database has been initialized.")
 
-# --- HTML TEMPLATE ROUTES ---
+# --- HTML TEMPLATE ROUTES (omitted for brevity, assume unchanged) ---
 
 # Splash screen route
 @app.route('/splash')
@@ -624,9 +648,59 @@ def api_index():
         "endpoints": {
             "/api/users": "User management",
             "/api/tasks": "Task management", 
-            "/api/quiz": "Quiz functionality"
+            "/api/quiz": "Quiz functionality",
+            "/api/detect_disease": "AI Crop Health Detector" # Added new endpoint
         }
     })
+
+# --- NEW AI CROP HEALTH DETECTION ROUTE ---
+@app.route('/api/detect_disease', methods=['POST'])
+def detect_disease():
+    if not disease_model or not disease_processor:
+        # 503 Service Unavailable if model failed to load
+        return jsonify({"success": False, "error": "AI Model not initialized on server."}), 503
+
+    if 'file' not in request.files:
+        return jsonify({"success": False, "error": "No image file provided in the request"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "error": "No image selected"}), 400
+    
+    try:
+        # 1. Read the image stream and open it with PIL
+        image_bytes = file.read()
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB") # Ensure it's RGB
+
+        # 2. Process the image for the Vision Transformer model
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        inputs = disease_processor(images=image, return_tensors="pt").to(device)
+
+        # 3. Perform prediction (inference)
+        with torch.no_grad():
+            outputs = disease_model(**inputs)
+        
+        # 4. Get the predicted class label
+        logits = outputs.logits
+        predicted_class_idx = logits.argmax(-1).item()
+        predicted_label = disease_model.config.id2label[predicted_class_idx]
+        
+        # Extract the raw probability for confidence score
+        probabilities = torch.softmax(logits, dim=1)
+        confidence = probabilities[0][predicted_class_idx].item()
+        
+        # 5. Return the result
+        return jsonify({
+            "success": True,
+            "predicted_label": predicted_label,
+            "confidence_score": f"{confidence * 100:.2f}%",
+            "message": f"Disease Detected: {predicted_label}. Confidence: {confidence * 100:.2f}%"
+        })
+
+    except Exception as e:
+        app.logger.error(f"Prediction failed: {e}")
+        return jsonify({"success": False, "error": f"Internal server error during prediction: {str(e)}"}), 500
+
 your_weatherapi_key = os.environ.get("WEATHERAPI_KEY")
 
 # WeatherAPI key and base URL

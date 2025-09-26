@@ -67,6 +67,17 @@
                 <button onclick="activateEmergency(3)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Simulate Level 3 Alert</button>
                 <button onclick="resetDashboard()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Reset to Clear</button>
             </div>
+            <!-- NEW: Crop Health Simulation -->
+            <div class="mt-6 pt-4 border-t border-gray-700">
+                <h2 class="text-lg font-semibold mb-3">Crop Health Check</h2>
+                <p class="text-sm text-gray-400 mb-2">Upload a leaf image to see the AI Diagnosis.</p>
+                <label for="ai-test-file" class="file-input-button w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M12 20h9"></path><path d="M16.5 3.5l-2.91 2.91a4 4 0 0 0-1.17 2.83V21h8.5v-8.5a4 4 0 0 0 2.83-1.17l2.91-2.91a2 2 0 0 0 0-2.83l-2.91-2.91a4 4 0 0 0-2.83-1.17H3.5"></path></svg>
+                    Test Crop Detector
+                </label>
+                <input type="file" id="ai-test-file" accept="image/*" class="file-input-hidden" onchange="testCropDetector(event)">
+                <div id="ai-test-result" class="mt-3 text-sm text-gray-300">Awaiting image upload...</div>
+            </div>
         </div>
 
         <!-- Emergency Section (Hidden by default) -->
@@ -88,15 +99,17 @@
     <script>
         // --- DATA ---
         const allTasks = [
-            { id: 1, description: "Check and clear rainwater drains on your property.", level: 1, points: 10, completed: false, image: null },
-            { id: 2, description: "Bring any outdoor furniture, decorations, or trash cans inside.", level: 1, points: 15, completed: false, image: null },
-            { id: 3, description: "Stock up on non-perishable food and bottled water.", level: 1, points: 20, completed: false, image: null },
-            { id: 4, description: "Secure all windows and doors. Board up if necessary.", level: 2, points: 25, completed: false, image: null },
-            { id: 5, description: "Prepare an emergency kit with flashlight, batteries, and first-aid supplies.", level: 2, points: 30, completed: false, image: null },
-            { id: 6, description: "Move valuables to a higher floor to protect from potential flooding.", level: 2, points: 20, completed: false, image: null },
-            { id: 7, description: "Turn off utilities as instructed by authorities.", level: 3, points: 50, completed: false, image: null },
-            { id: 8, description: "Evacuate to a designated shelter or higher ground if in a flood-prone area.", level: 3, points: 100, completed: false, image: null },
-            { id: 9, description: "Check on neighbors, especially the elderly or vulnerable.", level: 3, points: 40, completed: false, image: null },
+            // Added a specific Crop Inspection task for demo
+            { id: 10, description: "Crop Health Inspection: Upload an image of a suspicious leaf for AI diagnosis.", level: 1, points: 50, completed: false, image: null, requiresAI: true, prediction: null },
+            { id: 1, description: "Check and clear rainwater drains on your property.", level: 1, points: 10, completed: false, image: null, requiresAI: false },
+            { id: 2, description: "Bring any outdoor furniture, decorations, or trash cans inside.", level: 1, points: 15, completed: false, image: null, requiresAI: false },
+            { id: 3, description: "Stock up on non-perishable food and bottled water.", level: 1, points: 20, completed: false, image: null, requiresAI: false },
+            { id: 4, description: "Secure all windows and doors. Board up if necessary.", level: 2, points: 25, completed: false, image: null, requiresAI: false },
+            { id: 5, description: "Prepare an emergency kit with flashlight, batteries, and first-aid supplies.", level: 2, points: 30, completed: false, image: null, requiresAI: false },
+            { id: 6, description: "Move valuables to a higher floor to protect from potential flooding.", level: 2, points: 20, completed: false, image: null, requiresAI: false },
+            { id: 7, description: "Turn off utilities as instructed by authorities.", level: 3, points: 50, completed: false, image: null, requiresAI: false },
+            { id: 8, description: "Evacuate to a designated shelter or higher ground if in a flood-prone area.", level: 3, points: 100, completed: false, image: null, requiresAI: false },
+            { id: 9, description: "Check on neighbors, especially the elderly or vulnerable.", level: 3, points: 40, completed: false, image: null, requiresAI: false },
         ];
 
         let currentTasks = [];
@@ -111,6 +124,8 @@
         const taskListContainer = document.getElementById('task-list');
         const totalPointsDisplay = document.getElementById('total-points');
         const simulationControls = document.getElementById('simulation-controls');
+        const aiTestResult = document.getElementById('ai-test-result');
+
 
         // --- FUNCTIONS ---
 
@@ -169,6 +184,12 @@
                 
                 let imagePreview = task.image ? `<img src="${task.image}" alt="Proof" class="mt-4 rounded-lg max-h-40 w-full object-cover">` : '<div class="mt-4 h-40 bg-gray-700 rounded-lg flex items-center justify-center text-gray-500">Image Preview</div>';
 
+                let aiMessage = '';
+                if (task.requiresAI && task.prediction) {
+                     const color = task.prediction.toLowerCase().includes('healthy') ? 'text-green-400' : 'text-orange-400';
+                     aiMessage = `<span class="${color} font-bold">AI Diagnosis: ${task.prediction}</span><br>`;
+                }
+                
                 taskCard.innerHTML = `
                     <div class="flex justify-between items-start">
                         <p class="text-lg font-medium pr-4">${task.description}</p>
@@ -183,7 +204,7 @@
                     <div class="mt-4 flex flex-col sm:flex-row gap-3">
                         <label for="file-${task.id}" class="file-input-button w-full sm:w-auto flex-grow justify-center bg-gray-600 hover:bg-gray-700 text-white ${task.completed ? 'hidden' : ''}">
                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            Upload Image
+                            ${task.requiresAI ? 'Diagnose & Upload' : 'Upload Proof'}
                         </label>
                         <input type="file" id="file-${task.id}" accept="image/*" class="file-input-hidden" onchange="handleImageUpload(event, ${task.id})">
                         
@@ -192,6 +213,7 @@
                         </button>
                     </div>
                     <div class="status-message text-center mt-3 text-sm">
+                        ${aiMessage}
                         ${task.completed ? '<span class="text-green-400 font-bold">✓ COMPLETED</span>' : '<span class="text-gray-400">Pending...</span>'}
                     </div>
                 `;
@@ -200,23 +222,98 @@
         }
 
         /**
-         * Handles the image file upload and preview.
+         * Handles the image file upload and sends it to the AI model if required.
          * @param {Event} event - The file input change event.
          * @param {number} taskId - The ID of the task.
          */
         function handleImageUpload(event, taskId) {
             const file = event.target.files[0];
             if (!file) return;
+            
+            const task = currentTasks.find(t => t.id === taskId);
+            const card = document.getElementById(`task-${taskId}`);
+            const statusMessage = card.querySelector('.status-message');
 
+            // --- 1. Display Image Preview ---
             const reader = new FileReader();
             reader.onload = function(e) {
-                const task = currentTasks.find(t => t.id === taskId);
                 task.image = e.target.result;
                 renderTasks(); // Re-render to show the image preview
             };
             reader.readAsDataURL(file);
+            
+            // --- 2. AI Diagnosis if the task requires it ---
+            if (task.requiresAI) {
+                // Show loading state
+                statusMessage.innerHTML = '<span class="text-yellow-400 font-bold">Analyzing crop... 🤖</span>';
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                fetch('/api/detect_disease', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        task.prediction = data.predicted_label;
+                        statusMessage.innerHTML = `<span class="text-green-400 font-bold">AI Diagnosis: ${data.predicted_label} (${data.confidence_score})</span>`;
+                        // Auto-enable 'Mark as Complete' if prediction is received (user took action)
+                        card.querySelector('.complete-btn').disabled = false;
+                        
+                        // Optional logic for immediate feedback/next steps
+                        if (!data.predicted_label.toLowerCase().includes('healthy')) {
+                             statusMessage.innerHTML += `<br><span class="text-orange-400">Action Required: Consult the guide for recommended treatment!</span>`;
+                        }
+                    } else {
+                        statusMessage.innerHTML = `<span class="text-red-500 font-bold">AI Error: ${data.error}</span>`;
+                        task.prediction = 'Error';
+                    }
+                    renderTasks();
+                })
+                .catch(error => {
+                    statusMessage.innerHTML = `<span class="text-red-500 font-bold">Network/Server Error.</span>`;
+                    console.error('Fetch Error:', error);
+                    task.prediction = 'Error';
+                    renderTasks();
+                });
+            } else {
+                // If no AI is required, just show a confirmation message
+                statusMessage.innerHTML = '<span class="text-green-400">Proof image uploaded. Ready to complete!</span>';
+            }
         }
 
+        /**
+         * Test function for the general Crop Health Detector (not tied to a task).
+         */
+        function testCropDetector(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            aiTestResult.innerHTML = '<span class="text-yellow-400">Analyzing image... 🤖</span>';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/detect_disease', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    aiTestResult.innerHTML = `<span class="text-green-400 font-bold">SUCCESS! Diagnosis: ${data.predicted_label} (${data.confidence_score})</span>`;
+                } else {
+                    aiTestResult.innerHTML = `<span class="text-red-500 font-bold">AI Test Failed: ${data.error}</span>`;
+                }
+            })
+            .catch(error => {
+                aiTestResult.innerHTML = `<span class="text-red-500 font-bold">Network Error. Check Flask server status.</span>`;
+                console.error('Fetch Error:', error);
+            });
+        }
+        
         /**
          * Marks a task as complete and updates points.
          * @param {number} taskId - The ID of the task to complete.
@@ -267,6 +364,7 @@
             allTasks.forEach(task => {
                 task.completed = false;
                 task.image = null;
+                task.prediction = null;
             });
             currentTasks = [];
             taskListContainer.innerHTML = '';
