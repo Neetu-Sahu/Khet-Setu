@@ -269,6 +269,8 @@
             background: rgba(76, 175, 80, 0.6);
             border-radius: 3px;
         }
+        
+        
 
         /* Responsive design */
         @media (max-width: 600px) {
@@ -290,7 +292,6 @@
     </style>
 </head>
 <body>
-    <!-- Animated background elements -->
     <div class="floating-elements">
         <div class="farm-element">🌾</div>
         <div class="farm-element">🚜</div>
@@ -317,12 +318,6 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('signup') }}">
-            <div class="form-group full-width">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" placeholder="Create your unique username" required>
-                <span class="input-icon">👤</span>
-            </div>
-
             <div class="form-group full-width">
                 <label class="form-label">Full Name</label>
                 <input type="text" name="name" class="form-control" placeholder="Enter your full name" required>
@@ -361,7 +356,9 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
                 🌱 Create KhetSetu Account
             </button>
         </form>
@@ -378,5 +375,9 @@
             <a href="{{ url_for('login') }}">← Back to Login</a>
         </div>
     </div>
+
+    <script>
+        // Signup page scripts
+    </script>
 </body>
 </html>

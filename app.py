@@ -36,13 +36,8 @@ except Exception as e:
     disease_processor = None
     disease_model = None
 
-
-# In a real application, you MUST use a secure hashing library.
-# from werkzeug.security import generate_password_hash, check_password_hash
-
 # --- Database Connection Management ---
 def get_db():
-    """Opens a new database connection if there is none for the current context."""
     if 'db' not in g:
         g.db = sqlite3.connect(app.config['DATABASE'])
         g.db.row_factory = sqlite3.Row
@@ -50,14 +45,11 @@ def get_db():
 
 @app.teardown_appcontext
 def close_db(exception):
-    """Closes the database at the end of the request."""
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
-# --- Core Database Logic Functions (omitted for brevity, assume unchanged) ---
 def create_tables(conn):
-    """Sets up all required tables using shortuuid for primary keys."""
     cursor = conn.cursor()
     
     # Users table
@@ -321,7 +313,7 @@ def get_user_by_phone(conn, phone):
 
 def get_user_profile_data(conn, user_id):
     """Fetches all profile data for a specific user."""
-    return conn.cursor().execute('SELECT user_id, phone_number, full_name, village, district, state, sustainability_score, points FROM users WHERE user_id = ?', (user_id,)).fetchone()
+    return conn.cursor().execute('SELECT user_id, phone_number, full_name, village, district, state, sustainability_score, points, created_at FROM users WHERE user_id = ?', (user_id,)).fetchone()
 
 def update_user_task_status(conn, user_task_id, new_status, evidence_path=None):
     """Updates the status of a specific user task."""
@@ -384,7 +376,7 @@ def init_db_command():
 def splash():
     return render_template('splash.html')
 
-# Root â†’ Redirects to splash
+# Root → Redirects to splash
 @app.route('/')
 def index():
     return redirect(url_for('splash'))
@@ -501,7 +493,23 @@ def profile():
         return redirect(url_for('login'))
     
     db = get_db()
-    user_data = get_user_profile_data(db, session['user_id'])
+    user_row = get_user_profile_data(db, session['user_id'])
+    
+    if not user_row:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Convert the immutable Row object to a mutable dictionary
+    user_data = dict(user_row)
+
+    # Convert the 'created_at' string to a datetime object
+    if user_data.get('created_at') and isinstance(user_data.get('created_at'), str):
+        try:
+            # The database stores timestamps in the format 'YYYY-MM-DD HH:MM:SS'
+            user_data['created_at'] = datetime.strptime(user_data['created_at'], '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            # If parsing fails, set it to None to avoid breaking the template
+            user_data['created_at'] = None
     
     # Get completed tasks count
     cursor = db.cursor()
@@ -511,8 +519,9 @@ def profile():
     ).fetchone()[0]
     
     return render_template('profile.html', 
-                         user_data=user_data, 
-                         completed_tasks=completed_tasks)
+                         user=user_data, 
+                         completed_tasks=completed_tasks,
+                         min=min)
 
 # Edit Profile route
 @app.route('/edit_profile', methods=['GET', 'POST'])

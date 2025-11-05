@@ -304,17 +304,13 @@
 </head>
 <body>
 
-    <!-- Profile fixed top right -->
-    <a href="#" class="profile-top-right" title="User Profile Dropdown">
+    <a href="{{ url_for('profile') }}" class="profile-top-right" title="View Profile">
         <span class="profile-image">
-            <!-- Replace with actual image if available -->
-            <!-- <img src="user-avatar.jpg" alt="Profile Image" /> -->
-        </span>
-        <span class="profile-name">Rachit Kanchan</span>
+            </span>
+        <span class="profile-name">{{ username }}</span>
         <i class="fa fa-caret-down"></i>
     </a>
 
-    <!-- Header with logo, dashboard text and nav buttons -->
     <header class="header-bar" role="banner" aria-label="Main navigation header">
         <div class="logo-container" aria-label="Site logo">
             <span class="logo-text">KhetSetu</span>
@@ -323,7 +319,7 @@
         <div class="dashboard-label" aria-label="Page Title">
             Dashboard
         </div>
-        <div style="width:70px"><!-- empty spacer to balance flex --></div>
+        <div style="width:70px"></div>
     </header>
 
     <nav class="nav-buttons-row" aria-label="Primary navigation buttons">

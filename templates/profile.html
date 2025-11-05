@@ -258,6 +258,8 @@
             font-weight: 500;
         }
 
+        
+
         /* Achievements section */
         .achievements {
             grid-column: span 2;
@@ -461,7 +463,6 @@
     </style>
 </head>
 <body>
-    <!-- Floating background elements -->
     <div class="floating-elements">
         <div class="floating-leaf">🌿</div>
         <div class="floating-leaf">🌱</div>
@@ -492,7 +493,6 @@
         </a>
 
         <div class="profile-container">
-            <!-- Profile Info Card -->
             <div class="card">
                 <div class="card-title">
                     👤 Profile Information
@@ -548,7 +548,6 @@
                 </div>
             </div>
 
-            <!-- Profile Details Card -->
             <div class="card">
                 <div class="card-title">
                     📋 Personal Details
@@ -589,10 +588,11 @@
                         </div>
                         <div class="detail-value">{{ user.created_at.strftime('%B %Y') if user.created_at else 'Recently joined' }}</div>
                     </div>
+
+                    
                 </div>
             </div>
 
-            <!-- Achievements Card -->
             <div class="card achievements">
                 <div class="card-title">
                     🏆 Achievements & Badges
