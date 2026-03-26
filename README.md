@@ -1,33 +1,51 @@
-Problem Statement ID:   25075
-Problem Statement Title:    "Gamified Platform to Promote Sustainable Farming Practices"
+# 🌾 KhetSetu: Connecting Farmers, Knowledge & Sustainability
 
-PROBLEM
+**KhetSetu** is a gamified digital platform designed to educate and motivate farmers to adopt sustainable agricultural practices through interactive challenges, rewards, and community participation. Developed by team **Harvest Hackers** for **Smart India Hackathon 2025**.
 
-Despite numerous awareness campaigns, many farmers still rely on unsustainable practices—excessive chemical use, over-irrigation, or mono-cropping—due to habit, lack of training, or limited engagement. Traditional training methods often fail to inspire lasting behavioural change, especially among younger farmers.
+---
+**https://khet-setu.onrender.com**
+---
 
-CHALLENGE
+## 🛑 Problem Statement
+Despite numerous awareness campaigns, many farmers still rely on unsustainable practices—excessive chemical use, over-irrigation, or mono-cropping—due to habit, lack of training, or limited engagement.
 
-Design a gamified digital platform that educates and motivates farmers to adopt sustainable agricultural practices through interactive challenges, rewards, and community participation.
+* **Lack of Awareness:** Limited knowledge of sustainable farming techniques.
+* **Unpredictable Weather:** Climate change affects crop planning and final yields.
+* **Emergency Handling:** Difficulties managing sudden pest outbreaks, floods, or droughts.
+* **Limited Market Access:** Difficulty in selling produce at fair prices and accessing quality tools.
 
-CORE FEATUES
+---
 
-- Learning Through Play: Convert best practices—such as organic input use, mixed cropping, soil health management—into engaging missions or tasks.
-- Personalized Quests: Tailor challenges based on the farmer’s crop, location, and farm size—e.g., “Complete 3 weeks of mulching on banana fields” or “Switch to bio-pesticides this season.”
-- Progress Tracker: Visual dashboards showing farmer progress, sustainability score, and learning badges.
-- Peer Sharing & Leaderboards: Allow farmers to share progress and earn recognition locally or panchayat-wise.
-- Incentive System: Link rewards to real-world benefits like scheme eligibility points, training credits, or public recognition.
+## 💡 Proposed Solution
+KhetSetu transforms the agricultural experience by integrating technology with gamification to inspire lasting behavioral change.
 
-EXPECTED IMPACT
+### 1. Gamified Learning & Community
+* **Interactive Quizzes:** Educational modules that teach sustainable practices in a fun, engaging way.
+* **Levels & Rewards:** Farmers earn XP, badges, and "Eco Points" for completing sustainable tasks.
+* **Leaderboards:** Promotes friendly competition and collaborative farming within the community.
 
-- Encourages adoption of eco-friendly practices in a fun, engaging way.
-- Builds a digitally connected community of progressive farmers.
-- Makes sustainable farming accessible, especially for youth and early adopters.
+### 2. Smart Agricultural Tools
+* **Weather AI:** Real-time detection and forecasting to safeguard crops.
+* **Crop Health Detector:** AI-powered image recognition to identify diseases and suggest treatments.
+* **Emergency Dashboard:** A tiered alert system (Levels 1-3) for immediate danger response.
 
-Organization:	Government of Kerala
-Department:	Department of Agriculture
-Category:	Software
-Theme:	Agriculture, FoodTech & Rural Development
+### 3. Integrated Marketplace
+* **Direct Selling:** Ease in selling crops at fair market prices[cite: 21, 58].
+* **Incentivized Buying:** Earn discounts on farming tools and fertilizers through earned badges and points.
 
-This platform transforms agricultural extension from top-down instruction to a bottom-up, gamified experience—making sustainable farming a goal, a game, and a movement.
-This solution scores moderately on innovation (3/5) since gamification has been used in multiple sectors, but its application in farming sustainability is relatively new. Feasibility (5/5) is very high because gamified apps are straightforward to build using existing frameworks, and farmers can access them via mobile devices. The impact (5/5) is significant, as it directly influences farmer behavior, encouraging eco-friendly practices and long-term agricultural health. Technical depth (4/5) is solid, involving backend data tracking, behavioral analytics, and interactive app design. Sustainability (4/5) is good, as the platform can be regularly updated with new challenges and reward systems to keep farmers engaged. Scalability (4/5) is also strong, as the model can be applied across different regions, crops, and even international contexts, though cultural and linguistic tailoring will be necessary.
+---
 
+## 🛠️ Technical Approach
+* **Frontend:** HTML, CSS, JavaScript (Tailwind CSS).
+* **Backend:** Python (Flask).
+* **Database:** SQLite.
+* **Mobile:** Flutter for cross-platform access.
+* **APIs:** Weather API and Image Detection (Vision Transformers).
+
+---
+
+## 📈 Impact & Benefits
+* **Economic:** Reduces crop loss through early disease detection and ensures fair pricing via the marketplace.
+* **Environmental:** Promotes sustainable farming at scale and reduces dependency on harmful chemicals.
+* **Social:** Builds confidence, community spirit, and digital literacy among rural farmers.
+* **Governmental:** Allows authorities to track farmer progress and increase subsidy awareness.
