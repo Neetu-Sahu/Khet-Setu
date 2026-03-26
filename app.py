@@ -2,8 +2,9 @@ import sqlite3
 import shortuuid
 from flask import Flask, jsonify, request, g, render_template, redirect, url_for, session, flash
 from datetime import datetime
-import requests 
+import requests
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- AI Model Imports ---
 # NOTE: You must install these libraries: pip install torch torchvision transformers Pillow
@@ -16,25 +17,33 @@ import io
 app = Flask(__name__)
 app.config['DATABASE'] = 'farm_game.db'
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True  # Makes API output readable
-app.secret_key = "your_secret_key"  # For session management
+# Use environment variable for secret key, fallback to a generated local secret for non-production
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(32))
 
 # --- AI Model Configuration ---
 MODEL_NAME = "wambugu71/crop_leaf_diseases_vit"
 
-# Caching: Load the model globally once to avoid slow repeated loading
-try:
-    print(f"Loading Crop Disease Model: {MODEL_NAME}...")
-    # Initialize the processor (for image normalization/resizing)
-    # Using 'cpu' as default for broader compatibility, switch to 'cuda' if GPU is available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    disease_processor = ViTImageProcessor.from_pretrained(MODEL_NAME)
-    disease_model = ViTForImageClassification.from_pretrained(MODEL_NAME).to(device)
-    disease_model.eval() # Set model to evaluation mode
-    print("Crop Disease Model loaded successfully.")
-except Exception as e:
-    print(f"ERROR: Failed to load AI model. Predictions will fail. Make sure you have PyTorch and Hugging Face libraries installed. Error: {e}")
-    disease_processor = None
-    disease_model = None
+disease_processor = None
+disease_model = None
+model_load_attempted = False
+
+def load_ai_model():
+    global disease_processor, disease_model, model_load_attempted
+    if model_load_attempted:
+        return
+    model_load_attempted = True
+
+    try:
+        print(f"Loading Crop Disease Model: {MODEL_NAME}...")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        disease_processor = ViTImageProcessor.from_pretrained(MODEL_NAME)
+        disease_model = ViTForImageClassification.from_pretrained(MODEL_NAME).to(device)
+        disease_model.eval()
+        print("Crop Disease Model loaded successfully.")
+    except Exception as e:
+        print(f"ERROR: Failed to load AI model. Predictions will fail. Make sure you have PyTorch and Hugging Face libraries installed. Error: {e}")
+        disease_processor = None
+        disease_model = None
 
 # --- Database Connection Management ---
 def get_db():
@@ -401,8 +410,7 @@ def signup():
             return redirect(url_for('signup'))
         
         user_id = shortuuid.uuid()
-        # In a real app: password_hash = generate_password_hash(password)
-        password_hash = password  # Placeholder
+        password_hash = generate_password_hash(password)
         
         db.execute(
             'INSERT INTO users (user_id, phone_number, password_hash, full_name, village, district, state) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -425,7 +433,7 @@ def login():
         db = get_db()
         user = db.execute('SELECT * FROM users WHERE phone_number = ?', (phone,)).fetchone()
         
-        if user and user['password_hash'] == password:  # In a real app, use check_password_hash
+        if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['user_id']
             session['username'] = user['full_name']
             flash("Login successful!", "success")
@@ -580,8 +588,8 @@ def settings():
         return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Return JSON for AJAX requests
-        if request.is_json or request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
+        # Return JSON for AJAX requests only
+        if request.is_json:
             return jsonify({'success': True, 'message': 'Settings saved successfully!'})
         
         flash('Settings saved successfully!', 'success')
@@ -665,6 +673,7 @@ def api_index():
 # --- NEW AI CROP HEALTH DETECTION ROUTE ---
 @app.route('/api/detect_disease', methods=['POST'])
 def detect_disease():
+    load_ai_model()
     if not disease_model or not disease_processor:
         # 503 Service Unavailable if model failed to load
         return jsonify({"success": False, "error": "AI Model not initialized on server."}), 503
@@ -713,8 +722,8 @@ def detect_disease():
 your_weatherapi_key = os.environ.get("WEATHERAPI_KEY")
 
 # WeatherAPI key and base URL
-API_KEY = "f0320ea1882b47abadb105525250809"
-BASE_URL = "http://api.weatherapi.com/v1"
+API_KEY = your_weatherapi_key or os.environ.get("WEATHERAPI_KEY_FALLBACK")
+BASE_URL = "https://api.weatherapi.com/v1"
 
 MOCK_DATA = {
     "location": {
@@ -789,4 +798,5 @@ def levels():
     return render_template('levels.html', username=session.get('username'))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() in ['1', 'true', 'yes']
+    app.run(debug=debug_mode)
