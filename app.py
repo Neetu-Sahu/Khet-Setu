@@ -798,5 +798,6 @@ def levels():
     return render_template('levels.html', username=session.get('username'))
 
 if __name__ == "__main__":
-    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() in ['1', 'true', 'yes']
-    app.run(debug=debug_mode)
+    # Get port from environment variable for Render
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
