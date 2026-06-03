@@ -35,12 +35,31 @@ KhetSetu transforms the agricultural experience by integrating technology with g
 
 ---
 
-## 🛠️ Technical Approach
-* **Frontend:** HTML, CSS, JavaScript (Tailwind CSS).
-* **Backend:** Python (Flask).
-* **Database:** SQLite.
-* **Mobile:** Flutter for cross-platform access.
-* **APIs:** Weather API and Image Detection (Vision Transformers).
+## 🛠️ Tech Stack
+
+### Frontend
+* **Markup & Styling:** HTML5, CSS3, Tailwind CSS
+* **Scripting:** Vanilla JavaScript
+
+### Backend
+* **Framework:** Python · Flask
+* **Auth & Security:** Werkzeug (password hashing, request utilities)
+* **Production Server:** Gunicorn
+* **Utilities:** shortuuid (ID generation), Python `requests`
+
+### Database
+* **Engine:** SQLite (via Python `sqlite3`)
+
+### AI / ML
+* **Model Framework:** PyTorch (`torch`)
+* **Model Architecture:** Vision Transformer — `wambugu71/crop_leaf_diseases_vit` (Hugging Face `transformers`)
+* **Image Processing:** Pillow (PIL)
+
+### External APIs
+* **Weather Data:** WeatherAPI.com (current conditions, 3-day forecast, AQI & alerts)
+
+### Deployment
+* **Hosting:** Render — [https://khet-setu.onrender.com](https://khet-setu.onrender.com)
 
 ---
 
