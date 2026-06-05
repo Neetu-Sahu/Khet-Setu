@@ -12,8 +12,7 @@ https://khet-setu.onrender.com
 
 </div>
   <br>
-  [![Flask](https://img.shields.io/badge/Backend-Flask-green?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
-  [![Hugging Face](https://img.shields.io/badge/AI-Hugging%20Face-yellow?style=for-the-badge&logo=huggingface)](https://huggingface.co/)
+  
 </div>
 
 ---
