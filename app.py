@@ -6,22 +6,49 @@ import requests
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# --- AI Model Imports ---
-# NOTE: You must install these libraries: pip install torch torchvision transformers Pillow
-from transformers import ViTForImageClassification, ViTImageProcessor
+# --- AI Model Imports & Vercel Database Configuration ---
+import os
+import shutil
+
+# Try importing torch and transformers for local execution.
+# If they are not installed (e.g., on Vercel), we fallback to the Hugging Face Inference API.
+try:
+    from transformers import ViTForImageClassification, ViTImageProcessor
+    import torch
+    HAS_LOCAL_AI = True
+except ImportError:
+    HAS_LOCAL_AI = False
+
 from PIL import Image
-import torch
 import io
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
-app.config['DATABASE'] = 'farm_game.db'
+
+# Check if running in a serverless Vercel environment
+IS_VERCEL = "VERCEL" in os.environ
+db_path = os.environ.get('DATABASE_PATH', 'farm_game.db')
+
+if IS_VERCEL:
+    # Use writeable /tmp directory on Vercel
+    tmp_db_path = '/tmp/farm_game.db'
+    # Copy the bundled database if it doesn't exist in /tmp
+    if not os.path.exists(tmp_db_path):
+        original_db_path = os.path.join(os.path.dirname(__file__), 'farm_game.db')
+        if os.path.exists(original_db_path):
+            shutil.copy2(original_db_path, tmp_db_path)
+            print(f"Copied database from {original_db_path} to {tmp_db_path}")
+        else:
+            print("Original database file not found. A new one will be created in /tmp.")
+    db_path = tmp_db_path
+
+app.config['DATABASE'] = db_path
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True  # Makes API output readable
-# Use environment variable for secret key, fallback to a generated local secret for non-production
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(32))
 
 # --- AI Model Configuration ---
 MODEL_NAME = "wambugu71/crop_leaf_diseases_vit"
+HF_API_URL = f"https://api-inference.huggingface.co/models/{MODEL_NAME}"
 
 disease_processor = None
 disease_model = None
@@ -29,19 +56,21 @@ model_load_attempted = False
 
 def load_ai_model():
     global disease_processor, disease_model, model_load_attempted
+    if not HAS_LOCAL_AI:
+        return
     if model_load_attempted:
         return
     model_load_attempted = True
 
     try:
-        print(f"Loading Crop Disease Model: {MODEL_NAME}...")
+        print(f"Loading Crop Disease Model locally: {MODEL_NAME}...")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         disease_processor = ViTImageProcessor.from_pretrained(MODEL_NAME)
         disease_model = ViTForImageClassification.from_pretrained(MODEL_NAME).to(device)
         disease_model.eval()
         print("Crop Disease Model loaded successfully.")
     except Exception as e:
-        print(f"ERROR: Failed to load AI model. Predictions will fail. Make sure you have PyTorch and Hugging Face libraries installed. Error: {e}")
+        print(f"ERROR: Failed to load AI model locally. Fallback to HF Inference API will be used. Error: {e}")
         disease_processor = None
         disease_model = None
 
@@ -214,6 +243,14 @@ def create_tables(conn):
     ''')
 
     conn.commit()
+
+# Initialize tables if database is initialized on startup
+try:
+    with sqlite3.connect(app.config['DATABASE']) as conn:
+        create_tables(conn)
+    print("Database tables verified/created successfully.")
+except Exception as e:
+    print(f"Warning: Could not verify database tables on startup: {e}")
 
 # --- DATABASE FUNCTIONS (omitted for brevity, assume unchanged) ---
 
@@ -673,11 +710,6 @@ def api_index():
 # --- NEW AI CROP HEALTH DETECTION ROUTE ---
 @app.route('/api/detect_disease', methods=['POST'])
 def detect_disease():
-    load_ai_model()
-    if not disease_model or not disease_processor:
-        # 503 Service Unavailable if model failed to load
-        return jsonify({"success": False, "error": "AI Model not initialized on server."}), 503
-
     if 'file' not in request.files:
         return jsonify({"success": False, "error": "No image file provided in the request"}), 400
     
@@ -686,33 +718,67 @@ def detect_disease():
         return jsonify({"success": False, "error": "No image selected"}), 400
     
     try:
-        # 1. Read the image stream and open it with PIL
         image_bytes = file.read()
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB") # Ensure it's RGB
+        
+        # Check if we can run inference locally
+        load_ai_model()
+        if HAS_LOCAL_AI and disease_model and disease_processor:
+            # Local PyTorch/Transformers Inference
+            image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            inputs = disease_processor(images=image, return_tensors="pt").to(device)
+            with torch.no_grad():
+                outputs = disease_model(**inputs)
+            logits = outputs.logits
+            predicted_class_idx = logits.argmax(-1).item()
+            predicted_label = disease_model.config.id2label[predicted_class_idx]
+            probabilities = torch.softmax(logits, dim=1)
+            confidence = probabilities[0][predicted_class_idx].item()
+            source = "local"
+        else:
+            # Fallback: Hugging Face Inference API
+            print("Running inference via Hugging Face Inference API...")
+            headers = {}
+            hf_token = os.environ.get("HF_API_TOKEN")
+            if hf_token:
+                headers["Authorization"] = f"Bearer {hf_token}"
+            
+            # Call HF Inference API
+            response = requests.post(HF_API_URL, headers=headers, data=image_bytes, timeout=15)
+            
+            if response.status_code != 200:
+                try:
+                    res_json = response.json()
+                    if isinstance(res_json, dict) and "error" in res_json and "estimated_time" in res_json:
+                        return jsonify({
+                            "success": False,
+                            "error": f"Hugging Face model is starting up. Please try again in {int(res_json['estimated_time'])} seconds."
+                        }), 503
+                except Exception:
+                    pass
+                return jsonify({
+                    "success": False,
+                    "error": f"Hugging Face Inference API error: {response.text}"
+                }), response.status_code
+            
+            predictions = response.json()
+            if not isinstance(predictions, list) or len(predictions) == 0:
+                return jsonify({
+                    "success": False,
+                    "error": f"Unexpected response format from Hugging Face: {predictions}"
+                }), 502
+                
+            top_prediction = predictions[0]
+            predicted_label = top_prediction.get("label", "Unknown")
+            confidence = top_prediction.get("score", 0.0)
+            source = "huggingface_api"
 
-        # 2. Process the image for the Vision Transformer model
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        inputs = disease_processor(images=image, return_tensors="pt").to(device)
-
-        # 3. Perform prediction (inference)
-        with torch.no_grad():
-            outputs = disease_model(**inputs)
-        
-        # 4. Get the predicted class label
-        logits = outputs.logits
-        predicted_class_idx = logits.argmax(-1).item()
-        predicted_label = disease_model.config.id2label[predicted_class_idx]
-        
-        # Extract the raw probability for confidence score
-        probabilities = torch.softmax(logits, dim=1)
-        confidence = probabilities[0][predicted_class_idx].item()
-        
-        # 5. Return the result
         return jsonify({
             "success": True,
             "predicted_label": predicted_label,
             "confidence_score": f"{confidence * 100:.2f}%",
-            "message": f"Disease Detected: {predicted_label}. Confidence: {confidence * 100:.2f}%"
+            "message": f"Disease Detected: {predicted_label}. Confidence: {confidence * 100:.2f}%",
+            "inference_source": source
         })
 
     except Exception as e:
