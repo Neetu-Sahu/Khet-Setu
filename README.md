@@ -3,7 +3,7 @@
 <div align="center">
   <img src="static/images/logo.jpeg" alt="KhetSetu Logo" width="120" style="border-radius: 20px; margin-bottom: 15px;" />
   <p><strong>A gamified digital platform designed to educate, reward, and guide farmers toward sustainable agricultural practices.</strong></p>
-
+  👉 **Live Deployments:** 
   **https://khet-setu.onrender.com**
   
   [![Flask](https://img.shields.io/badge/Backend-Flask-green?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
@@ -13,9 +13,6 @@
 ---
 
 **KhetSetu** transforms traditional agriculture by combining gaming mechanics with powerful farm-management tools. Created by Team **Harvest Hackers** for **Smart India Hackathon 2025**.
-
-👉 **Live Deployments:** 
-* **Vercel (Serverless):** [https://khet-setu.vercel.app](https://khet-setu.vercel.app) *(Update with your URL!)*
 
 ---
 
