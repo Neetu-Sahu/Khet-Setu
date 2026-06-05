@@ -15,7 +15,6 @@
 
 👉 **Live Deployments:** 
 * **Vercel (Serverless):** [https://khet-setu.vercel.app](https://khet-setu.vercel.app) *(Update with your URL!)*
-* **Render (Standard):** [https://khet-setu.onrender.com](https://khet-setu.onrender.com)
 
 ---
 
